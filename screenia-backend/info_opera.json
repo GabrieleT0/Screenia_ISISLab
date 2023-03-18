@@ -1,0 +1,136 @@
+{
+  "Author": {
+    "name": "Gregorius Magnus",
+    "name_ita": "Gregorio Magno",
+    "name_en": "Gregory the Great",
+    "name_fr": "Grégoire le Grand",
+    "name_de": "Gregor der Große",
+    "name_short": "Gregorius",
+    "comment": null,
+    "Dates": [
+      {
+        "date": "12/03/604",
+        "death_date": true,
+        "birth_date": false,
+        "reference_date": true,
+        "comment": null
+      },
+      {
+        "date": "year 542",
+        "death_date": false,
+        "birth_date": true,
+        "reference_date": true,
+        "comment": "life date according to Deutsche Nationalbibliothek"
+      }
+    ],
+    "Places": [
+      {
+        "place": "Rome",
+        "current_place": null,
+        "death_place": false,
+        "birth_place": true,
+        "reference_place": true,
+        "comment": null
+      },
+      {
+        "place": "Rome",
+        "current_place": null,
+        "death_place": true,
+        "birth_place": false,
+        "reference_place": false,
+        "comment": null
+      }
+    ]
+  },
+  "Opera": {
+    "title": "Moralia in Iob",
+    "title_ita": "Commento morale a Giobbe",
+    "title_en": "Commentary on Job",
+    "title_fr": "Morales sur Job",
+    "title_de": null,
+    "title_short": "Moralia",
+    "date_composition": "VI secolo d.C",
+    "place_composition": null,
+    "current_place_composition": null,
+    "comment": null,
+    "Editions": [
+      {
+        "ISBN": "9782503014319",
+        "publisher": "Brepols Publisher",
+        "date": {
+          "year": "1979",
+          "month": null,
+          "day": null
+        },
+        "place": "Turnhout",
+        "IPI": null,
+        "volumes": [
+          "Moralia in Iob I-X",
+          "Moralia in Iob XI-XXII",
+          "Moralia in Iob XXIII-XXXV"
+        ],
+        "series": "Corpus Christianorum Series Latina",
+        "reference_edition": true,
+        "comment": null
+      }
+    ],
+    "Books": [
+      {
+        "number": 1,
+        "title": null,
+        "title_ita": null,
+        "title_en": null,
+        "title_fr": null,
+        "title_de": null,
+        "title_short": null,
+        "volume": 1,
+        "ISBN_Edition": null,
+        "Chapters": [
+          {
+            "number": 1,
+            "title": "Prova",
+            "title_ita": "Prova",
+            "title_en": null,
+            "title_fr": null,
+            "title_de": null,
+            "title_short": "Prova"
+          }
+        ]
+      },
+      {
+        "number": 2,
+        "title": null,
+        "title_ita": null,
+        "title_en": null,
+        "title_fr": null,
+        "title_de": null,
+        "title_short": null,
+        "volume": 1,
+        "ISBN_Edition": null,
+        "Chapters": [
+          {
+            "number": 10,
+            "title": "Prova 10",
+            "title_ita": "Prova 10",
+            "title_en": null,
+            "title_fr": null,
+            "title_de": null,
+            "title_short": "Prova 10"
+          }
+        ]
+      },
+      {
+        "number": 3,
+        "title": null,
+        "title_ita": null,
+        "title_en": null,
+        "title_fr": null,
+        "title_de": null,
+        "title_short": null,
+        "volume": 1,
+        "ISBN_Edition": null,
+        "Chapters": []
+      }
+    ]
+  }
+}
