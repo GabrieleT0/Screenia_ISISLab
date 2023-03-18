@@ -1,0 +1,7 @@
+screenia-frontend/node_modules/
+screenia-backend/node_modules/
+screenia-frontend/package-lock.json
+screenia-backend/package-lock.json
+screenia-backend/.env
+screenia-frontend/.env
+screenia-backend/logs
