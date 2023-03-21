@@ -1,5 +1,5 @@
 import axios from "axios";
-const service = "http://localhost:3001";
+const service = `${process.env.REACT_APP_BACKEND_ENDPOINT}`;
 
 const opereApi = axios.create({
     baseURL: service,
