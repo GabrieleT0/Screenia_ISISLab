@@ -2,7 +2,7 @@
   "name": "screenia",
   "version": "1.0.0",
   "private": true,
-  "homepage": "http://www.isislab.it:12280/screenia",
+  "homepage": ".",
   "dependencies": {
     "@draft-js-plugins/anchor": "^4.2.0",
     "@draft-js-plugins/editor": "^4.1.3",
