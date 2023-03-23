@@ -3,10 +3,7 @@ require('dotenv').config();
 const express = require('express');
 import validateLogin from "../../middlware/validateLogin";
 import validateRegister from "../../middlware/validateRegister";
-import verifyToken from "../../middlware/verifyToken";
-import initModels from "../../models/init-models";
-const { Op } = require("sequelize");
-import { database } from "../../utils/database/sequelizeDB";
+import { user as userModel, role as roleModel } from "../../models";
 const router = express.Router();
 const bcrypt = require("bcryptjs");
 const jwt = require('jsonwebtoken');
@@ -14,29 +11,12 @@ const jwt = require('jsonwebtoken');
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET;
 const ACCESS_TOKEN_LIFE = process.env.ACCESS_TOKEN_LIFE;
 
-router.get('/check_token', verifyToken, async function (req, res, next) {
-    const user = {...req.user};
-
-    const userData = {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        surname: user.surname,
-        role: user.role.name,
-        other_info: user.other_info,
-        is_approved: user.is_approved
-    }
-
-    return res.send(userData);
-});
-
 router.post('/login', validateLogin ,async function (req, res, next) {
     const { ...body } = req.body;
 
     try {
-        const Models = await initModels(database);
-        const User = Models.user;
-        const Role = Models.role;
+        const User = userModel;
+        const Role = roleModel;
 
         const user = await User.findOne({
             where: {
@@ -68,7 +48,8 @@ router.post('/login', validateLogin ,async function (req, res, next) {
         const accessToken = jwt.sign(
             user.toJSON(), ACCESS_TOKEN_SECRET, { expiresIn:  ACCESS_TOKEN_LIFE })
 
-        //One minute for test: Date.now() + 1 * 60 * 1000
+        //One minute expires for test: new Date(Number(new Date())+ 1 * 60 * 1000)
+        //3h expires: new Date(Number(new Date()) + (3600*3)*1000)
         res.cookie('token', accessToken, { httpOnly: true, secure: true, SameSite: 'strict' , expires: new Date(Number(new Date()) + (3600*3)*1000) });
 
         const userData = {
@@ -91,9 +72,8 @@ router.post('/sign-up', validateRegister, async function (req, res, next) {
     const body = { ...req.body};
 
     try {
-        const Models = await initModels(database);
-        const User = Models.user;
-        const Role = Models.role;
+        const User = userModel;
+        const Role = roleModel;
 
         const userExistQuery = await User.findOne({
             where: {
@@ -140,7 +120,6 @@ router.post('/sign-up', validateRegister, async function (req, res, next) {
 })
 
 router.post('/logout', async function (req, res, next) {
-   //const body = { ...req.body};
     const token = req.cookies.token;
 
     try {
