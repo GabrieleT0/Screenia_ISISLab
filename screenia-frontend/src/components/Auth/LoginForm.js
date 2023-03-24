@@ -5,7 +5,7 @@ import { toast } from 'react-toastify';
 import useLoader from '../../customHooks/loaderHooks/useLoader';
 import { useEffect } from 'react';
 import { fetchLogin } from '../../api/authApi';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import useLocalStorage from '../../customHooks/localStorage/useLocalStorage';
 import { useRecoilState } from 'recoil';
 import { userAtom } from '../../state/user/userAtom';
@@ -22,6 +22,7 @@ const LoginForm = () => {
     const [userLocalStorage, setUserLocalStorage] = useLocalStorage("user", {});
     const [user, setUser] = useRecoilState(userAtom);
     const [authToken, setAuthToken] = useRecoilState(authTokenAtom);
+    const location = useLocation();
 
     const onSubmit = async (data) => {
         try {
@@ -36,7 +37,8 @@ const LoginForm = () => {
             //setUserLocalStorage(response.data);
             setAuthToken(response.data.accessToken);
             setUser(response.data);
-            return navigate("/");
+
+            navigate(-1);
         } catch(e) {
             console.log('e', e)
             if(e.response && e.response?.data?.message) {

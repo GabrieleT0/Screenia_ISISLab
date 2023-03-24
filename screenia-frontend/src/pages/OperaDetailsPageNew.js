@@ -47,6 +47,7 @@ import { commentAtom } from "../state/comment/commentAtom";
 import useOperaDetails from "../customHooks/operaHooks/useOperaDetails";
 import { getParagraphsSelector } from "../state/paragraph/paragraphSelector";
 import { paragraphAtom } from "../state/paragraph/paragraphAtom";
+import useComponentByUserRole from "../customHooks/authHooks/useComponentByRole";
 
 const CloseButtonFilteredComment = styled(IconButton)(({ theme }) => ({
     position: "relative",
@@ -167,7 +168,10 @@ const OperaDetailsPage = () => {
     const paragraphs = useRecoilValue(getParagraphsSelector);
     const [paragraphFilter, setParagraphFilter] = useRecoilState(paragraphAtom);
 
-    console.log('comments', comments);
+    const isUserAccessAddComment = useComponentByUserRole(
+        authToken, 
+        ["admin", "editor"], 
+        user?.role || null);
 
 
     const fetchOperaDetails = useRecoilCallback(({ set }) => async (id) => {
@@ -335,7 +339,7 @@ const OperaDetailsPage = () => {
             <Grid item xs={12} md={6}>
                 <CardEdition editions={editions} handleSelect={(edition) => setEditionSelected(edition)}/>
             </Grid>*/}
-            {authToken && 
+            {isUserAccessAddComment &&
                 (<Grid item xs={12}>
                     <CommentParagraph 
                         opera={{

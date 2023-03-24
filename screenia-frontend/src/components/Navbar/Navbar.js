@@ -135,7 +135,7 @@ export default function Navbar() {
           </DrawerHeader>
           <Divider />
           <List>
-            {mainListItems(authToken, user)}
+            {mainListItems(authToken, user, handleDrawerClose)}
           </List>
         </Drawer>
         <Main open={open}>
@@ -170,7 +170,7 @@ export default function Navbar() {
                     </ProtectedRoute>
                   }
                 />
-                <Route path="/opera">
+                {/*<Route path="/opera">
                   <Route path=":id" element={
                     authToken 
                     ? (<ProtectedRoute allowedRoles={["editor", "admin"]}>
@@ -198,47 +198,12 @@ export default function Navbar() {
                       </Route>
                     </Route>
                   </Route>
-                </Route>
-                <Route exact path="/room/:idRoom" element={<DiscussionCommentPage />}/>
-              {/*<Route exact path="/room/:idCurrentComment" element={<DiscussionCommentPage />}/>
-                <Route exact path="/approval_user" element={
-                  <ProtectedRoute>
-                    <UserApprovalePage />
-                  </ProtectedRoute>}/>
-                <Route exact path="/" element={
-                  <ProtectedRoute>
-                    <OperePage />
-                  </ProtectedRoute>}/>
-                <Route exact path="/tags" element={
-                  <ProtectedRoute>
-                    <TagPage />
-                  </ProtectedRoute>}/>
+                </Route>*/}
                 <Route path="/opera">
-                  <Route path=":id" element={
-                    <ProtectedRoute>
-                      <OperaDetailsPageNew />
-                    </ProtectedRoute>} >
-                    <Route path=":paramIdBook" element={
-                      <ProtectedRoute>
-                        <OperaDetailsPageNew />
-                      </ProtectedRoute>} >
-                      <Route path=":paramIdChapter" element={
-                          <ProtectedRoute>
-                            <OperaDetailsPageNew />
-                          </ProtectedRoute>} >
-                        <Route path=":paramIdParagraph" element={
-                          <ProtectedRoute>
-                            <OperaDetailsPageNew />
-                          </ProtectedRoute>} />
-                      </Route>
-                    </Route>
+                  <Route path=":id" element={<OperaDetailsPageNew />} >
                   </Route>
                 </Route>
-                <Route exact path="/logout" element={
-                  <ProtectedRoute>
-                    <Logout />
-                  </ProtectedRoute>}/>
-                {!isAuth && <Route exact path="/login" element={<LoginRegister />}/>}*/}
+                <Route exact path="/room/:idRoom" element={<DiscussionCommentPage />}/>
               </Routes>
           </Container>
         </Main>

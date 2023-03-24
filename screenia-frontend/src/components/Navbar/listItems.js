@@ -49,7 +49,7 @@ const routes = [
     }
 ]
 
-export const mainListItems = (isAuth, user) => {
+export const mainListItems = (isAuth, user, handleClickItem) => {
   const homeRoute = routes.find(({ title }) => title.toLowerCase() === "home");
   const noAuthRoutes = routes.filter((route) => !route.isPrivate);
   const authRoutes = routes.filter((route) => route.isPrivate);
@@ -57,7 +57,7 @@ export const mainListItems = (isAuth, user) => {
 
   if(!isAuth) {
     return (noAuthRoutes.map(({ title, path, icon }) => (
-      <ListItemButton key={title} component={Link} to={path}>
+      <ListItemButton key={title} component={Link} to={path} onClick={handleClickItem}>
         <ListItemIcon>
             {icon}
         </ListItemIcon>

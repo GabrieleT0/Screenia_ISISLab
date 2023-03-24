@@ -14,6 +14,9 @@ import { IconButton } from "@mui/material";
 import { Tooltip } from "@mui/material";
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import { opereAtom } from "../state/opera/opereAtom";
+import useComponentByUserRole from "../customHooks/authHooks/useComponentByRole";
+import authTokenAtom from "../state/authToken/authTokenAtom";
+import { userAtom } from "../state/user/userAtom";
 
 const OPERE_FOR_PAGE = 10;
 
@@ -22,6 +25,12 @@ const OperePage = () => {
     const [page, setPage] = useState(1);
     const [openUploadOpera, setOpenUploadOpera] = useState(false);
     const [fileOpera, setFileOpera] = useState(null);
+    const authToken = useRecoilValue(authTokenAtom);
+    const user = useRecoilValue(userAtom);
+    const isUserAccessAddComment = useComponentByUserRole(
+        authToken, 
+        ["admin"], 
+        user?.role || null);
 
     const opereFetch = useRecoilCallback(({ set }) => async (page = 1, forPage = OPERE_FOR_PAGE) => {
         try {
@@ -83,14 +92,15 @@ const OperePage = () => {
 
     return (
         <>
-            <IconButton 
+            {isUserAccessAddComment && 
+            (<IconButton 
                 color="secondary" 
                 onClick={reloadOpere}
                 style={{ float: "right" }}>
                 <Tooltip title="Reload Opera">
                     <RestartAltIcon></RestartAltIcon>
                 </Tooltip>
-            </IconButton>
+            </IconButton>)}
             {openUploadOpera && 
             (<SimpleDialog
                 open={openUploadOpera}
@@ -140,7 +150,8 @@ const OperePage = () => {
                     }
                 </Grid>
             </Grid>
-            <Fab 
+            {isUserAccessAddComment && 
+            (<Fab 
                 onClick={handleDialogUploadOpera} 
                 color="secondary" 
                 aria-label="Upload Opera" 
@@ -150,7 +161,7 @@ const OperePage = () => {
                     right: 15
                 }}>
                 <FileUploadIcon style={{ color: "#fff" }} />
-            </Fab>
+            </Fab>)}
       </>
     )
 }

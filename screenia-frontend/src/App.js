@@ -9,12 +9,13 @@ import { useRecoilState } from 'recoil';
 import { userAtom } from './state/user/userAtom';
 import { fetchCheckToken } from './api/authApi';
 import useLocalStorage from './customHooks/localStorage/useLocalStorage';
-import useCheckToken from './customHooks/authHooks/useCheckToken';
 import ConfirmModal from './components/Dialog/ConfirmDialog';
 import authTokenAtom from './state/authToken/authTokenAtom';
+import useTokenExpirationChecker from './customHooks/authHooks/useTokenExpirationChecker';
 
 function App() {
   const { isOpenLoader } = useLoader();
+  useTokenExpirationChecker();
   
   return (
     <>
