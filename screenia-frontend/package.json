@@ -2,7 +2,7 @@
   "name": "screenia",
   "version": "1.0.0",
   "private": true,
-  "homepage": ".",
+  "homepage": "/screenia",
   "dependencies": {
     "@draft-js-plugins/anchor": "^4.2.0",
     "@draft-js-plugins/editor": "^4.1.3",
