@@ -82,13 +82,14 @@ const RegisterForm = ({ handleAfterRegister }) => {
 
         const fbUrlRegex = /^https?:\/\/(?:www\.)?facebook\.com\/(?:\w+\/)*\w+(?:\/)?$/;
         const twitterUrlRegex = /^https?:\/\/(?:www\.)?twitter\.com\/(?:#!\/)?\w+(?:\/)?$/;
-        const linkedinUrlRegex = /^https?:\/\/(?:[\w]+\.)?linkedin\.com\/(?:[\w]+\.)?[\w-]+\/?(?:\?.*)?$/;
+        const linkedinUrlRegex = /^https?:\/\/(?:[\w]+\.)?linkedin\.com\/in\/(?:[\w-]+\/?)?(?:\?.*)?$/;
 
         if(social === "facebook" && !fbUrlRegex.test(url)) {
             return "The link is not correct!";
         } else if(social === "twitter" && !twitterUrlRegex.test(url)) {
             return "The link is not correct!";
         } else if(social === "linkedin" && !linkedinUrlRegex.test(url)) {
+            console.log('ok sto qui', url)
             return "The link is not correct!";
         }
       
