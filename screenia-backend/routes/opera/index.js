@@ -6,6 +6,6 @@ router.get('/', getAllOpera);
 
 router.get('/:id', getOperaById);
 
-router.get('/uploadAllOpera', saveAllOpera);
+router.post('/uploadAllOpera', saveAllOpera);
 
 module.exports = router;

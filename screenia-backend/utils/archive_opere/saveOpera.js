@@ -1,29 +1,30 @@
 import { 
     author_opera_primary_literature, 
     book, 
-    chapter, 
-    date_author_primary_literature, 
+    chapter,
+    date_author_primary_literature,
     edition, 
     opera_primary_literature, 
     paragraph, 
     place_author_primary_literature, 
-    volume_edition 
+    volume_edition,
+    author_primary_literature,
+    db
 } from '../../models';
 import logger from '../log/loggers';
 import { readInfoOpera, readOpera } from './extract';
 
-const storeArchiveOpera = async (filePathOpera, connection, callback) => {
+const storeArchiveOpera = async (filePathOpera, callback) => {
     logger.info(`[STORE OPERA] - Start Path File: ${filePathOpera}`);
-
-    const infoOpera = await readInfoOpera(`${filePathOpera}/info.json`);
-    const { Author } = infoOpera;
-
-    const transaction = await connection.transaction();
+    console.log('db', db)
+    const transaction = await db.sequelize.transaction();
 
     try {
+        const infoOpera = await readInfoOpera(`${filePathOpera}/info.json`);
+        const { Author } = infoOpera;
 
         //Insert Authors
-        const AuthorPrimaryModel = author_opera_primary_literature;
+        const AuthorPrimaryModel = author_primary_literature;
 
         let authorFind = await AuthorPrimaryModel.findOne({ where: {
             name: Author.name
@@ -64,7 +65,7 @@ const storeArchiveOpera = async (filePathOpera, connection, callback) => {
             })
 
             const DateAuthorPrimaryModel = date_author_primary_literature;
-            const datesInsert = await DateAuthorPrimaryModel.bulkCreate(dates, { transaction: transaction })
+            await DateAuthorPrimaryModel.bulkCreate(dates, { transaction: transaction })
             logger.info(`[STORE OPERA] - Create Dates Author`);
         }
 
@@ -83,7 +84,7 @@ const storeArchiveOpera = async (filePathOpera, connection, callback) => {
             })
 
             const PlaceAuthorPrimaryModel = place_author_primary_literature;
-            const placesInsert = await PlaceAuthorPrimaryModel.bulkCreate(places, { transaction: transaction });
+            await PlaceAuthorPrimaryModel.bulkCreate(places, { transaction: transaction });
             logger.info(`[STORE OPERA] - Create Dates Author`);
         }
 
@@ -130,7 +131,7 @@ const storeArchiveOpera = async (filePathOpera, connection, callback) => {
                 ISBN: itemEdition.ISBN,
                 publisher: itemEdition.publisher,
                 series: itemEdition.series,
-                date: itemEdition.date.month && itemEdition.date.day ? `${itemEdition.date.day}/${itemEdition.date.month}/${itemEdition.date.year}` : `${itemEdition.date.year}`,
+                date: itemEdition.date,
                 place: itemEdition.place,
                 is_reference: itemEdition.reference_edition,
                 IPI: itemEdition.IPI,
@@ -139,7 +140,7 @@ const storeArchiveOpera = async (filePathOpera, connection, callback) => {
             }
         })
 
-        const editionsInsert = await Edition.bulkCreate(editionsOpera, {
+        await Edition.bulkCreate(editionsOpera, {
             include: { model: Volums, as: "volume_editions"},
             transaction: transaction
        })
@@ -173,8 +174,7 @@ const storeArchiveOpera = async (filePathOpera, connection, callback) => {
                     it_title: itemBook.title_ita,
                     en_title: itemBook.title_en,
                     fr_title: itemBook.title_fr,
-                    de_title: itemBook.title_de,
-                    //chapters: chapters
+                    de_title: itemBook.title_de
                 }
             })
 
@@ -203,14 +203,13 @@ const storeArchiveOpera = async (filePathOpera, connection, callback) => {
         const ChapterModel = chapter;
         operaContents.forEach((itemParagraph) => {
             if(!itemParagraph || !itemParagraph.contents) {
-                return;
+                throw new Error("The content of the paragraph cannot be empty!");
             }
 
             if(!chapters.some(({ number, number_book }) => (
                 parseInt(number) === parseInt(itemParagraph.chapter) &&
                 parseInt(number_book) === parseInt(itemParagraph.book)
             ))) {
-                console.log('false', itemParagraph.chapter+" "+itemParagraph.book)
                 chapters.push({
                     number: parseInt(itemParagraph.chapter),
                     number_book: parseInt(itemParagraph.book),
@@ -223,24 +222,37 @@ const storeArchiveOpera = async (filePathOpera, connection, callback) => {
                 });
             }
             
-            itemParagraph.contents.map((content, index) => {                   
+            itemParagraph.contents.map((content, index) => { 
+                //Recupero la label, cioé il testo che sta prima del carattere "#" (se presente)
+                let labelParagraph = null;
+                let contentParagraph = null;
+
+                if (content.includes("#")) {
+                    const contentSplitLabel = content.split("#");
+                    labelParagraph = contentSplitLabel[0];
+                    contentParagraph = contentSplitLabel[1];
+                } else {
+                    contentParagraph = content;
+                }
+
                 paragraphs.push({
                     number: index+1,
                     number_book: itemParagraph.book,
                     number_chapter: itemParagraph.chapter,
                     id_opera: OperaPrimaryDB.dataValues.id,
-                    text: content,
+                    text: contentParagraph.trim(),
                     number_paragraph_infr: index === 0 ? null : index,
-                    number_paragraph_supr: (index === itemParagraph.length - 1) ? null : index+2
+                    number_paragraph_supr: (index === itemParagraph.contents.length - 1) ? null : index+2,
+                    label: labelParagraph
                 })
             })
         });
         //[END] Retrive Paragraphs in File
 
-        const chaptersInsert = await ChapterModel.bulkCreate([...chapters], { transaction: transaction });
+        await ChapterModel.bulkCreate([...chapters], { transaction: transaction });
         logger.info(`[STORE OPERA] - Create Chapters}`);
 
-        const paragraphsInsert = await ParagraphModel.bulkCreate(paragraphs, { transaction: transaction });
+        await ParagraphModel.bulkCreate(paragraphs, { transaction: transaction });
         logger.info(`[STORE OPERA] - Create Paragraphs`);
 
         await transaction.commit();

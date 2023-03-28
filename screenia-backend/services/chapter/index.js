@@ -6,8 +6,8 @@ const getAllChapter = async (idOpera, idBook) => {
   
         const chapters = await Chapter.findAll({
             where: {
-            id_opera: idOpera,
-            number_book: idBook
+                id_opera: idOpera,
+                number_book: idBook
             }
         })
 

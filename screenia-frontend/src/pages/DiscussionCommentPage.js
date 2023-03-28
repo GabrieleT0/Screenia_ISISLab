@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { 
     Paper,
     List,
@@ -19,7 +19,7 @@ import {
     ToggleButton
 } from "@mui/material";
 import { toast } from 'react-toastify';
-import { fetchCommentsByRoom, fetchDiscussionByRoom } from '../api/opereApi';
+import { fetchCommentsByRoom, fetchDiscussionByRoom, fetchPostDiscussionByRoom } from '../api/opereApi';
 import { useParams } from 'react-router-dom';
 import { Box } from '@mui/system';
 import Message from '../components/Room/Message';
@@ -29,13 +29,24 @@ import { Element, Events, animateScroll as scroll, scrollSpy, scroller } from 'r
 import { getCommentsAndDiscussionsSelector } from '../state/room/roomSelector';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { roomCommentsAtom } from '../state/room/roomAtom';
+import uuid from 'react-uuid';
+import { EditorState } from 'draft-js';
+import confirmModalAtom from '../state/modal/confirmModalAtom';
+import { Contrast } from '@mui/icons-material';
 
 export default function DiscussionCommentPage() {
     const { idRoom } = useParams();
     const theme = useTheme();
-    const [toggleDiscussion, setToogleDiscussion] = useState(null);
+    const [toggleDiscussion, setToogleDiscussion] = useState('both');
     const messages = useRecoilValue(getCommentsAndDiscussionsSelector);
     const [room, setRoom] = useRecoilState(roomCommentsAtom);
+    const [editor, setEditor] = useState(() => EditorState.createEmpty());
+    const [textEditor, setTextEditor] = useState({
+        plainText: "",
+        convertToRaw: {}
+    });
+    //Confirm Modal State
+    const [modal, setModal] = useRecoilState(confirmModalAtom);
 
     useEffect(() => {
         setRoom({
@@ -47,11 +58,73 @@ export default function DiscussionCommentPage() {
     useEffect(() => console.log('messages', messages), [messages]);
 
     const handleChangeToggleDiscussion = (event, newToggle) => {
+        if(!newToggle) return;
+
+        setToogleDiscussion(newToggle);
+        
         setRoom({
             idRoom: idRoom,
             filter: newToggle
         })
     };
+
+    const handleChangeEditor = useCallback((plainText, convertToRaw) => {
+        setTextEditor({
+            plainText,
+            convertToRaw
+        })
+    })
+
+    const onSubmitDiscussion = useCallback(async () => {
+        try {
+            await fetchPostDiscussionByRoom({
+                text: JSON.stringify(textEditor.convertToRaw),
+                flat_text: textEditor.plainText,
+                room_id: idRoom
+            });
+
+            resetAllParams()
+
+            setRoom({
+                idRoom: idRoom,
+                filter: toggleDiscussion
+            })
+        } catch(e) {
+
+        }
+    })
+
+    const handleConfirmSubmitDiscussion = () => {
+        if(!validateDiscussion()) return;
+
+        setModal({
+            isOpen: true,
+            title: "Are you sure you want to submit the comment?",
+            description: "The operation is irreversible!",
+            handleConfirm: onSubmitDiscussion
+        })
+    }
+
+    const validateDiscussion = () => {
+        if(!textEditor.plainText.trim()) {
+            toast.warning("Non è possibile inviare un commento vuoto!");
+            return false;
+        } else if(textEditor.plainText.trim().length < 5) {
+            toast.warning("Per inviare un commento bisogna inserire almeno cinque caratteri!");
+            return false;
+        }
+
+        return true;
+    }
+
+    const resetAllParams = () => {
+        setEditor(() => EditorState.createEmpty());
+
+        setTextEditor({
+            plainText: "",
+            convertToRaw: {}
+        })
+    }
 
     return (
         <>
@@ -62,7 +135,7 @@ export default function DiscussionCommentPage() {
                 sx={{ marginBottom: 3 }}>
                 <ToggleButtonGroup
                     color="primary"
-                    value={room.filter}
+                    value={toggleDiscussion}
                     exclusive
                     onChange={handleChangeToggleDiscussion}
                 >
@@ -101,17 +174,18 @@ export default function DiscussionCommentPage() {
                             alignItems="stretch" >
                                 <Grid item>
                                     <DraftEditor
-                                        editor={null}
+                                        editorKey={uuid()}
+                                        editor={editor}
                                         readOnly={false}
-                                        idOpera={180} 
-                                        callbackChangeEditor={() => console.log('ok')} 
+                                        disabledMension={true}
+                                        callbackChangeEditor={handleChangeEditor} 
                                         styleOptions={{ width: '100%', maxHeight: '200px', overflowY: 'scroll' }} />
                                 </Grid>
                                 <Grid item>
                                     <Button 
                                         variant="contained" 
                                         color="primary"
-                                        onClick={() => console.log('ok')}
+                                        onClick={handleConfirmSubmitDiscussion}
                                         style={{ float: "right" }}>
                                         Save
                                     </Button>

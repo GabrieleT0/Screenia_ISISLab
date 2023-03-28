@@ -103,6 +103,10 @@ const fetchDiscussionByRoom = async (idRoom) => {
     return await opereApi.get(`/discussion/room/${idRoom}`);
 }
 
+const fetchPostDiscussionByRoom = async (body) => {
+    return await opereApi.post(`/discussion`, { ...body });
+}
+
 export {
     fetchAllOpere,
     fetchOpera,
@@ -122,5 +126,6 @@ export {
     fetchCommentsReview,
     fetchCreateRoom,
     fetchCommentsByRoom,
-    fetchDiscussionByRoom
+    fetchDiscussionByRoom,
+    fetchPostDiscussionByRoom
 }

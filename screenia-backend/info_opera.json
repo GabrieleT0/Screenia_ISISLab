@@ -57,11 +57,7 @@
       {
         "ISBN": "9782503014319",
         "publisher": "Brepols Publisher",
-        "date": {
-          "year": "1979",
-          "month": null,
-          "day": null
-        },
+        "date": "1979-1985",
         "place": "Turnhout",
         "IPI": null,
         "volumes": [
@@ -85,17 +81,7 @@
         "title_short": null,
         "volume": 1,
         "ISBN_Edition": null,
-        "Chapters": [
-          {
-            "number": 1,
-            "title": "Prova",
-            "title_ita": "Prova",
-            "title_en": null,
-            "title_fr": null,
-            "title_de": null,
-            "title_short": "Prova"
-          }
-        ]
+        "Chapters": []
       },
       {
         "number": 2,
@@ -107,20 +93,94 @@
         "title_short": null,
         "volume": 1,
         "ISBN_Edition": null,
-        "Chapters": [
-          {
-            "number": 10,
-            "title": "Prova 10",
-            "title_ita": "Prova 10",
-            "title_en": null,
-            "title_fr": null,
-            "title_de": null,
-            "title_short": "Prova 10"
-          }
-        ]
+        "Chapters": []
       },
       {
         "number": 3,
+        "title": null,
+        "title_ita": null,
+        "title_en": null,
+        "title_fr": null,
+        "title_de": null,
+        "title_short": null,
+        "volume": 1,
+        "ISBN_Edition": null,
+        "Chapters": []
+      },
+      {
+        "number": 4,
+        "title": null,
+        "title_ita": null,
+        "title_en": null,
+        "title_fr": null,
+        "title_de": null,
+        "title_short": null,
+        "volume": 1,
+        "ISBN_Edition": null,
+        "Chapters": []
+      },
+      {
+        "number": 5,
+        "title": null,
+        "title_ita": null,
+        "title_en": null,
+        "title_fr": null,
+        "title_de": null,
+        "title_short": null,
+        "volume": 1,
+        "ISBN_Edition": null,
+        "Chapters": []
+      },
+      {
+        "number": 6,
+        "title": null,
+        "title_ita": null,
+        "title_en": null,
+        "title_fr": null,
+        "title_de": null,
+        "title_short": null,
+        "volume": 1,
+        "ISBN_Edition": null,
+        "Chapters": []
+      },
+      {
+        "number": 7,
+        "title": null,
+        "title_ita": null,
+        "title_en": null,
+        "title_fr": null,
+        "title_de": null,
+        "title_short": null,
+        "volume": 1,
+        "ISBN_Edition": null,
+        "Chapters": []
+      },
+      {
+        "number": 8,
+        "title": null,
+        "title_ita": null,
+        "title_en": null,
+        "title_fr": null,
+        "title_de": null,
+        "title_short": null,
+        "volume": 1,
+        "ISBN_Edition": null,
+        "Chapters": []
+      },
+      {
+        "number": 9,
+        "title": null,
+        "title_ita": null,
+        "title_en": null,
+        "title_fr": null,
+        "title_de": null,
+        "title_short": null,
+        "volume": 1,
+        "ISBN_Edition": null,
+        "Chapters": []
+      },
+      {
+        "number": 10,
         "title": null,
         "title_ita": null,
         "title_en": null,

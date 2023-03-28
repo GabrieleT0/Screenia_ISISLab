@@ -9,14 +9,19 @@ import { fetchTags } from '../../api/opereApi';
 import CircularProgress from '@mui/material/CircularProgress';
 import { toast } from 'react-toastify';
 import InfoIcon from '@mui/icons-material/Info';
+import _ from "lodash";
 
 const TagAutocomplete = ({ value = [], handleSelect = null, readOnly = false }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [tagValue, setTagValue] = useState("");
     const [tagsOptions, setTagsOptions] = useState([]);
 
+    const debouncedSearchTags = _.debounce((value) => searchTags(value), 1000);
+
     useEffect(() => {
-        searchTags(tagValue);
+        if(!tagValue) return;
+
+        debouncedSearchTags(tagValue)
     }, [tagValue]);
 
     const searchTags = async (value) => {

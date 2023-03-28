@@ -26,9 +26,14 @@ const fetchSignUp = async (body) => {
     return await authApi.post(`/sign-up`, {...body});
 }
 
+const fetchVerifyAccount = async (token) => {
+    return await authApi.get(`/verify-account/${token}`);
+}
+
 export {
     fetchLogin,
     fetchCheckToken,
     fetchLogout,
-    fetchSignUp
+    fetchSignUp,
+    fetchVerifyAccount
 }

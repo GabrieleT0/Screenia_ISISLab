@@ -43,7 +43,7 @@ router.post('/',
     }
 
     try {
-      await DiscussionService.create({
+      await DiscussionService.createDiscussion({
         insert_date: new Date(),
         text: body.text,
         flat_text: body.flat_text,

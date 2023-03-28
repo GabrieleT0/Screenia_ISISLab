@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import {
   Avatar,
   Button,
@@ -17,8 +17,19 @@ import { EditorState } from 'draft-js';
 import { convertFromRaw } from 'draft-js';
 import moment from "moment";
 import PriorityHighIcon from '@mui/icons-material/PriorityHigh';
+import uuid from "react-uuid";
 
 const MessageDiscussion = ({ message }) => {
+  const [editor, setEditor] = useState(null);
+
+  useEffect(() => {
+    if(message && message.text) {
+      setEditor(EditorState.createWithContent(
+        convertFromRaw(JSON.parse(message.text))
+      ))
+    }
+  }, [message])
+
   return (
     <Grid
       container
@@ -43,7 +54,8 @@ const MessageDiscussion = ({ message }) => {
       </Grid>
       <Grid item>
         <DraftEditor
-          content={convertFromRaw(JSON.parse(message.text))}
+          editorKey={uuid()}
+          editor={editor}
           readOnly={true}
           idOpera={180} 
           idComment={129} 
@@ -55,7 +67,16 @@ const MessageDiscussion = ({ message }) => {
 }
 
 const MessageComment = ({ message }) => {
-  console.log('o messagg', message)
+  const [editor, setEditor] = useState(null);
+
+  useEffect(() => {
+    if(message && message.text) {
+      setEditor(EditorState.createWithContent(
+        convertFromRaw(JSON.parse(message.text))
+      ))
+    }
+  }, [message])
+
   return (
     <Grid
       container
@@ -83,7 +104,8 @@ const MessageComment = ({ message }) => {
         </Stack>
       </Grid>
       <Grid item>
-        {parseInt(message.from_paragraph) !== parseInt(message.to_paragraph) && (
+        {message.from_paragraph && message.to_paragraph 
+          && parseInt(message.from_paragraph) !== parseInt(message.to_paragraph) && (
             <Typography variant="caption" style={{ color: "#00000094" }}>
                 Comment from paragraph <strong>{message.from_paragraph}</strong> to <strong>{message.to_paragraph}</strong>
             </Typography>
@@ -96,7 +118,8 @@ const MessageComment = ({ message }) => {
       </Grid>
       <Grid item>
         <DraftEditor
-          content={convertFromRaw(JSON.parse(message.text))}
+          editorKey={uuid()}
+          editor={editor}
           readOnly={true}
           idOpera={180} 
           idComment={129} 
@@ -127,4 +150,5 @@ const Message = ({ message }) => {
       </Card>
   );
 };
+
 export default Message;

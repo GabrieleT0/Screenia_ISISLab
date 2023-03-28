@@ -1,3 +1,4 @@
+import { Sequelize } from "sequelize";
 import { book, chapter } from "../../models";
 
 const getAllBookByOpera = async (idOpera) => {
@@ -10,7 +11,14 @@ const getAllBookByOpera = async (idOpera) => {
                 id_opera: idOpera
             },
             include: [
-                { model: Chapter, as: 'chapters' }
+                { 
+                    model: Chapter,
+                    as: 'chapters',
+                    where: {
+                        id_opera: idOpera,
+                        number_book: Sequelize.col('book.number')
+                    }
+                }
             ]
         })
 
@@ -31,7 +39,14 @@ const getBookByOpera = async (idOpera, idBook) => {
                 number: idBook
             },
             include: [
-                { model: Chapter, as: 'chapters' }
+                { 
+                    model: Chapter, 
+                    as: 'chapters',
+                    where: {
+                        id_opera: idOpera,
+                        number_book: idBook
+                    }
+                }
             ]
         })
 

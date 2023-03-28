@@ -26,8 +26,9 @@ const ConfirmModal = () => {
     });
   };
 
-  return ReactDOM.createPortal((
-    <Dialog
+  return ReactDOM.createPortal(
+    isOpen && 
+    (<Dialog
         open={isOpen}
         onClose={handleClose}
         aria-labelledby="alert-dialog-title"

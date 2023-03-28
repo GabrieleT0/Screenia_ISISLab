@@ -70,85 +70,6 @@ function a11yProps(index) {
   };
 }
 
-const CommentsParagraph = ({ paragraph }) => {
-  const [offset, setOffset] = useState(5);
-  const [comments, setComments] = useState([]);
-  const [maxComments, setMaxComments] = useState(0);
-
-  useEffect(() => {
-    if(paragraph && paragraph.number) {
-      loadComment(offset);
-      console.log('comments.length', comments.length);
-      console.log('maxComments', maxComments);
-    }
-  }, [offset])
-
-  const loadComment = async (limit) => {
-    if(!paragraph.number) return;
-
-    try {
-      const response = await fetchAllComment(
-        paragraph.id_opera, 
-        paragraph.number_book, 
-        paragraph.number_chapter,
-        paragraph.number,
-        limit
-      );
-      setComments(response?.data?.comments || []);
-      if(response?.data?.maxComments) {
-        setMaxComments(parseInt(response.data.maxComments));
-      }
-    } catch(e) {
-      console.log('Error: ', e)
-    }
-  }
-
-  const handleChangeOffset = useCallback((plus = true) => {
-    setOffset((lastOffset) => plus ? lastOffset+3 : lastOffset-3);
-  })
-
-  return comments.length > 0 && (
-      <Box sx={{ width: '100%', maxWidth: 700, bgcolor: 'background.paper' }}>
-        <List sx={{ width: '100%' }}>
-          {comments.map((comment) => (
-            <ListItem key={comment.id}>
-              <Grid container wrap="nowrap" spacing={2}>
-                  <Grid item>
-                      <Avatar alt={`${comment.username}`} />
-                  </Grid>
-                  <Grid justifyContent="left" item xs zeroMinWidth>
-                      <h4 style={{ margin: 0, textAlign: "left", display: "inline" }}>{comment.username}</h4>
-                      <p style={{ textAlign: "left", color: "gray", display: "inline", marginLeft: 15 }}>
-                          {moment(comment.insert_date).format("DD/MM/YY HH:mm")}
-                      </p>
-                      <CommentParagraph 
-                        opera={{ 
-                          idOpera: paragraph.id_opera, 
-                          idBook: paragraph.number_book,
-                          idChapter: paragraph.number_chapter,
-                          idParagraph: paragraph.number_paragraph
-                        }}
-                        readOnly={true}
-                        initializeEditor={JSON.parse(comment.text)}
-                        tags={comment.tags}
-                      />
-                  </Grid>
-              </Grid>
-          </ListItem>
-          ))}
-        </List>
-        {comments.length !== maxComments && 
-          (<Button variant="text" onClick={() => handleChangeOffset(true)}>
-            View more comments
-          </Button>)}
-        {comments.length > 5 && 
-          (<Button variant="text" onClick={() => handleChangeOffset(false)}>
-            View less comments
-          </Button>)}
-      </Box>
-  )
-}
-
 const ParagraphText = ({ paragraphs, number, value, handleCommentParagraph }) => {
   const isSyncTextComment = useRecoilValue(syncTextCommentOpera);
 
@@ -171,7 +92,9 @@ const ParagraphText = ({ paragraphs, number, value, handleCommentParagraph }) =>
   return (
     <TabPanel id="container_paragraph" key={number} value={value} index={number}>
       {paragraphs.map((paragraph, index) => {
-          const { number, number_book, number_chapter, id_opera, text } = paragraph;
+          const { number, number_book, number_chapter, id_opera, text, label } = paragraph;
+          const labelParagraph = label ? `${label}. ` : "";
+
           return (
             <InView 
               root={document.getElementById(`paragraph_box`)} 
@@ -183,10 +106,7 @@ const ParagraphText = ({ paragraphs, number, value, handleCommentParagraph }) =>
                     { inView, entry }) : null}>
               <Typography id={`paragraph-${id_opera}-${number_book}-${number_chapter}-${number}`} style={index !== 0 ? { marginTop: 10 } : null}>
                 <p>
-                  <IconButton edge="start" onClick={() => handleCommentParagraph(number)}>
-                    <CommentIcon color="secondary" />
-                  </IconButton>
-                  <b>{`${index+1}. `}</b>{text}
+                  <b>{`${labelParagraph}`}</b>{text}
                 </p>
               </Typography>
               {/*<CommentsParagraph paragraph={paragraph} />*/}

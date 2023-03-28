@@ -134,12 +134,12 @@ const CommentParagraph = ({
             await fetchPostComment(comment);
             toast.success("Commento inserito!")
             resetInputsComment();
-            /*setCommentFilter({
+            setCommentFilter({
                 idOpera,
                 idBook,
                 idChapter,
                 filters: null
-            })*/
+            })
         } catch(e) {
             console.log('Error', e);
             toast.error("Impossibile inviare i dati. Contattare l'amministrazione!")
@@ -165,7 +165,6 @@ const CommentParagraph = ({
     }
 
     const handleSetRange = (value, range) => {
-        console.log('valueRANGE', value)
         if(range === "from") {
             setFromRange(parseInt(value));
         } else if(range === "to") {
@@ -283,6 +282,7 @@ const CommentParagraph = ({
                 </Grid>
                 <Grid item xs={12}>
                     <DraftEditor
+                        editorKey="comment_paragraph_editor"
                         editor={editor}
                         readOnly={false}
                         idOpera={opera.idOpera} 

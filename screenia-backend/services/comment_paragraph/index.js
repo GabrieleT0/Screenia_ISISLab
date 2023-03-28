@@ -72,7 +72,8 @@ const findAllComment = async (conditions, username, tags) => {
 
         //Aggiorno i dati del commento con i dati dell'ultima revisione
         const newComments = comments.map(comment => {
-            const commentJson = comment.get({ plain: true }); //Ottengo il commento come JSON senza wrapper Sequelize
+            //Ottengo il commento come JSON senza wrapper Sequelize
+            const commentJson = comment.get({ plain: true });
 
             if(commentJson.revisions[0]) {
                 let newComment = {
@@ -83,6 +84,8 @@ const findAllComment = async (conditions, username, tags) => {
 
                 return newComment;
             }
+
+            return commentJson;
         });
 
         //Filtro i commenti per tag

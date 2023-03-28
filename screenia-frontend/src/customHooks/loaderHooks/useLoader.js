@@ -1,10 +1,12 @@
 import { useState } from 'react';
+import { useRecoilState } from 'recoil';
+import loaderAtom from '../../state/loader/loaderAtom';
 
 const useLoader = () => {
-  const [isOpenLoader, setIsOpenLoeader] = useState(false);
+  const [isOpenLoader, setIsOpenLoeader] = useRecoilState(loaderAtom);
 
   function setLoader() {
-    setIsOpenLoeader(!isOpenLoader);
+    setIsOpenLoeader(isOpenLoader => !isOpenLoader);
   }
 
   return {

@@ -22,7 +22,7 @@ import { Container } from '@mui/material';
 import { BrowserRouter, Routes ,Route, Navigate } from 'react-router-dom';
 import OperePage from "../../pages/Opere";
 import { mainListItems } from './listItems';
-import OperaDetailsPageNew from '../../pages/OperaDetailsPageNew';
+import OperaDetailsPage from '../../pages/OperaDetailsPage';
 import TagPage from '../../pages/TagPage';
 import AuthPage from "../../pages/Opere"
 import LoginRegister from '../Auth/LoginRegister';
@@ -34,6 +34,7 @@ import { selectorIsAuth } from '../../state/user/userSelector';
 import DiscussionCommentPage from '../../pages/DiscussionCommentPage';
 import UserApprovalePage from '../../pages/UserApprovalPage';
 import authTokenAtom from '../../state/authToken/authTokenAtom';
+import VerifyAccountPage from '../../pages/VerifyAccountPage';
 
 const drawerWidth = 240;
 
@@ -170,6 +171,11 @@ export default function Navbar() {
                     </ProtectedRoute>
                   }
                 />
+                <Route
+                  path="/verify_account/:token"
+                  element={<VerifyAccountPage />}
+                  exact
+                />
                 {/*<Route path="/opera">
                   <Route path=":id" element={
                     authToken 
@@ -200,7 +206,7 @@ export default function Navbar() {
                   </Route>
                 </Route>*/}
                 <Route path="/opera">
-                  <Route path=":id" element={<OperaDetailsPageNew />} >
+                  <Route path=":id" element={<OperaDetailsPage />} >
                   </Route>
                 </Route>
                 <Route exact path="/room/:idRoom" element={<DiscussionCommentPage />}/>

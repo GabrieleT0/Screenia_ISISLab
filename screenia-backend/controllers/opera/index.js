@@ -73,11 +73,11 @@ const saveAllOpera = async (req, res) => {
     
         await extractArchive('tmp', tempFilePath);
 
-        res.status(200).send();
+        const deleteTempDirectory = () => (fs.rmSync(tempFolderPath, { recursive: true }));
 
-        const deleteTempDirectory = () => (fs.rmdirSync(tempFolderPath, { recursive: true }));
+        storeArchiveOpera(`${tempFolderPath}/${path.parse(file.name).name}`, deleteTempDirectory)
 
-        storeArchiveOpera(`${tempFolderPath}/${path.parse(file.name).name}`, CONNECTION_BD, deleteTempDirectory)
+        return res.status(200).send();
     } catch(e) {
         return res.status(500).send({ message: e.message });
     }

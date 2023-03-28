@@ -43,7 +43,28 @@ module.exports = function(sequelize, DataTypes) {
           model: 'role',
           key: 'id'
         }
-    }
+    },
+    facebook_profile: {
+      type: DataTypes.STRING(255),
+      allowNull: true
+    },
+    twitter_profile: {
+      type: DataTypes.STRING(255),
+      allowNull: true
+    },
+    linkedin_profile: {
+      type: DataTypes.STRING(255),
+      allowNull: true
+    },
+    personal_site: {
+      type: DataTypes.STRING(255),
+      allowNull: true
+    },
+    account_verify: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+      allowNull: false
+    },
   }, {
     sequelize,
     tableName: 'user',

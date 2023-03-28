@@ -38,6 +38,7 @@ import { convertFromRaw, convertToRaw } from 'draft-js';
 import { Link } from "react-router-dom";
 import { Typography } from '@mui/material';
 import { animateScroll as scroll, scroller } from 'react-scroll'
+import _ from 'lodash';
 
 function Entry(props) {
     const {
@@ -62,92 +63,86 @@ function Entry(props) {
 }
 
 export default function DraftEditor({ 
+    editorKey = "",
     editor = null, 
     idOpera = null, 
     callbackChangeEditor = null, 
-    readOnly = false, 
-    idComment = null, 
-    referenceToComment = null, 
-    isMentionsComment = false,
-    styleOptions = null
+    readOnly = false,
+    referenceToComment = null,
+    styleOptions = null,
+    disabledMension = false
 }) {
-const ref = useRef(null);
-const [editorState, setEditorState] = useState(() =>
-    EditorState.createEmpty()
-);
-const [open, setOpen] = useState(false);
-const [suggestions, setSuggestions] = useState([]);
-const linkPlugin = createLinkPlugin();
+    const ref = useRef(null);
+    const [editorState, setEditorState] = useState(null);
+    const [open, setOpen] = useState(false);
+    const [suggestions, setSuggestions] = useState([]);
+    const linkPlugin = createLinkPlugin();
 
-useEffect(() => {
-    if(editor) {
-        return setEditorState(editor);
-    }
-}, [editor])
+    useEffect(() => {
+        if(!editor) return;
 
-const { Toolbar, MentionSuggestions, plugins } = useMemo(() => {
-    const mentionPlugin = createMentionPlugin({
-        entityMutability: 'IMMUTABLE',
-        theme: mentionsStyles,
-        mentionTrigger: ['/out', '/in', '/comment', '/comment_multiple_reference'],
-        mentionRegExp: regexMention,
-        supportWhitespace: true,
-        mentionComponent(mentionProps) {
-            if(!mentionProps || !mentionProps.mention || !mentionProps.mention.id) {
-                return null;
-            }
+        setEditorState(editor);
+    }, [editor])
 
-            console.log('mentionProps', mentionProps)
+    const { Toolbar, MentionSuggestions, plugins } = useMemo(() => {
+        const mentionPlugin = createMentionPlugin({
+            entityMutability: 'IMMUTABLE',
+            theme: mentionsStyles,
+            mentionTrigger: ['/out', '/in', '/comment', '/comment_multiple_reference'],
+            mentionRegExp: regexMention,
+            supportWhitespace: true,
+            mentionComponent(mentionProps) {
+                if(!mentionProps || !mentionProps.mention || !mentionProps.mention.id) {
+                    return null;
+                }
 
-            if(mentionProps.mention.type === 'comment') {
+                if(mentionProps.mention.type === 'comment') {
+                    return (
+                        <Link 
+                            to={`/opera/${mentionProps.mention.link}`}
+                            className={mentionProps.className}>
+                                {`cfr_comment.`} {mentionProps.children}{`;`}
+                        </Link>
+                    );
+                }
+
+                if(mentionProps.mention.type === 'comment_multiple_reference') {
+                    return (
+                        <Link 
+                            onClick={() => {
+                                scroller.scrollTo(`#comment_${referenceToComment}`, {
+                                    duration: 1500,
+                                    delay: 100,
+                                    smooth: true,
+                                    containerId: 'container_comment',
+                                    offset: 50
+                                })
+                            }}
+                            className={mentionProps.className}>
+                                {mentionProps.children}{`;`}
+                        </Link>
+                    );
+                }
+
                 return (
                     <Link 
                         to={`/opera/${mentionProps.mention.link}`}
                         className={mentionProps.className}>
-                            {`cfr_comment.`} {mentionProps.children}{`;`}
+                            {`cfr.`} {mentionProps.children}{`;`}
                     </Link>
                 );
             }
+        });
 
-            if(mentionProps.mention.type === 'comment_multiple_reference') {
-                return (
-                    <Link 
-                        onClick={() => {
-                            scroller.scrollTo(`#comment_${referenceToComment}`, {
-                                duration: 1500,
-                                delay: 100,
-                                smooth: true,
-                                containerId: 'container_comment',
-                                offset: 50
-                            })
-                        }}
-                        className={mentionProps.className}>
-                            {mentionProps.children}{`;`}
-                    </Link>
-                );
-            }
+        const { MentionSuggestions } = mentionPlugin;
+        const toolbarPlugin = createToolbarPlugin();
+        const { Toolbar } = toolbarPlugin;
 
-            return (
-                <Link 
-                    to={`/opera/${mentionProps.mention.link}`}
-                    className={mentionProps.className}>
-                        {`cfr.`} {mentionProps.children}{`;`}
-                </Link>
-            );
-        },
-    });
-
-    const { MentionSuggestions } = mentionPlugin;
-    const toolbarPlugin = createToolbarPlugin();
-    const { Toolbar } = toolbarPlugin;
-
-    const plugins = [mentionPlugin, toolbarPlugin, linkPlugin];
-    return { plugins, MentionSuggestions, Toolbar };
+        const plugins = [mentionPlugin, toolbarPlugin, linkPlugin];
+        return { plugins, MentionSuggestions, Toolbar };
     }, []);
 
     const onChange = useCallback((_editorState) => {
-        //console.log('qui', _editorState.getCurrentContent().getPlainText())
-        //console.log('ok', convertToRaw(_editorState.getCurrentContent()));
         if(callbackChangeEditor) {
             callbackChangeEditor(
                 _editorState.getCurrentContent().getPlainText(),
@@ -158,32 +153,32 @@ const { Toolbar, MentionSuggestions, plugins } = useMemo(() => {
     }, []);
 
     const onOpenChange = useCallback((_open) => {
-        console.log('openend', _open)
         setOpen(_open);
     }, []);
 
-    const onSearchChange = useCallback(async ({ trigger, value }) => {
-
-        if(trigger === "/out") {
-            const dataOutMention = await fetchOutMentions(idOpera, value);
-            setSuggestions(dataOutMention.map((item) => ({
-                ...item,
-                type: "out"
-            })));
-        } else if(trigger === "/in") {
-            const dataInMention = await fetchInMentions(idOpera, value);
-            setSuggestions(dataInMention.map((item) => ({
-                ...item,
-                type: "in"
-            })));
-        } else if(trigger === "/comment") {
-            const dataInMention = await fetchCommentMentions(idOpera, value);
-            setSuggestions(dataInMention.map((item) => ({
-                ...item,
-                type: "comment"
-            })));
-        }
-    }, [])
+    const onSearchChange = useCallback(
+        _.debounce(async ({ trigger, value }) => {
+            if(trigger === "/out") {
+                const dataOutMention = await fetchOutMentions(idOpera, value);
+                setSuggestions(dataOutMention.map((item) => ({
+                    ...item,
+                    type: "out"
+                })));
+            } else if(trigger === "/in") {
+                const dataInMention = await fetchInMentions(idOpera, value);
+                setSuggestions(dataInMention.map((item) => ({
+                    ...item,
+                    type: "in"
+                })));
+            } else if(trigger === "/comment") {
+                const dataComment = await fetchCommentMentions(idOpera, value);
+                setSuggestions(dataComment.map((item) => ({
+                    ...item,
+                    type: "comment"
+                })));
+            }
+        }, 500) // intervallo di 500ms
+    , []);
 
     const fetchOutMentions = async (idOpera, searchTerm) => {
         const response = await fetchAutocompleteOutRichText(idOpera, searchTerm);
@@ -200,7 +195,7 @@ const { Toolbar, MentionSuggestions, plugins } = useMemo(() => {
         return response.data;
     }
 
-    return (
+    return editorState && (
         <div
             className={editorStyles.editor}
             onClick={() => {
@@ -209,14 +204,14 @@ const { Toolbar, MentionSuggestions, plugins } = useMemo(() => {
             style={styleOptions ? {...styleOptions} : null}
         >
         <Editor
-            editorKey={'editor'}
+            editorKey={editorKey}
             editorState={editorState}
             readOnly={readOnly}
             onChange={onChange}
             plugins={plugins}
             ref={ref}
         />
-        {(!isMentionsComment || !readOnly) &&
+        {(!disabledMension || readOnly) && 
             (<MentionSuggestions
                 open={open}
                 onOpenChange={onOpenChange}

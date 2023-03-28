@@ -53,6 +53,7 @@ const TagForm = ({ reloadTags = null }) => {
         handleSubmit, 
         getValues, 
         setValue, 
+        reset,
         formState: { errors } } = useHookForm({});
         
     const { setLoader } = useLoader();
@@ -70,9 +71,13 @@ const TagForm = ({ reloadTags = null }) => {
             if(reloadTags) {
                 reloadTags();
             }
+
+            reset()
         } catch(e) {
-            console.log('Error', e);
-            toast.error("Impossibile inviare i dati. Contattare l'amministrazione!")
+            const message = e?.response?.data?.message 
+                ? e.response.data.message :
+                 "Unable to submit data. Contact administration!"
+            toast.error(message);
         } finally {
             setLoader();
         }
@@ -94,14 +99,14 @@ const TagForm = ({ reloadTags = null }) => {
                                 value: true,
                                 message: 'Please enter something',
                             },
-                            /*minLength: {
+                            minLength: {
                                 value: 3,
                                 message: 'Please enter at least 3 characters'
                             },
-                            minLength: {
+                            maxLength: {
                                 value: 250,
                                 message: 'You can enter a maximum of 255 characters!'
-                            }*/
+                            }
                         }} />
                 </Grid>
                 <Grid item xs={12} md={4}>
@@ -112,6 +117,7 @@ const TagForm = ({ reloadTags = null }) => {
                             clearable: false,
                         }}
                         items={[
+                            { label: "", value: "" },
                             { label: "Concepts", value: "concepts" },
                             { label: "Models", value: "models" }
                         ]}
@@ -119,7 +125,7 @@ const TagForm = ({ reloadTags = null }) => {
                             required: {
                                 value: true,
                                 message: 'Please select atleast one',
-                            },
+                            }
                         }}
                     />
                 </Grid>
@@ -138,14 +144,14 @@ const TagForm = ({ reloadTags = null }) => {
                                 message: 'Required',
                                 value: false,
                             },
-                            /*minLength: {
+                            minLength: {
                                 value: 5,
                                 message: 'Please enter at least 5 characters'
                             },
-                            minLength: {
+                            maxLength: {
                                 value: 255,
                                 message: 'You can enter a maximum of 255 characters!'
-                            }*/
+                            }
                         }} />
                 </Grid>
                 <Grid item xs={12}>
@@ -174,7 +180,6 @@ const TagPage = () => {
             const response = await fetchTags();
             setTags(response.data || []);
         } catch(e) {
-
         }
     }
 

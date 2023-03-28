@@ -13,15 +13,22 @@ import KeyIcon from '@mui/icons-material/Key';
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import RepeatIcon from '@mui/icons-material/Repeat';
 import { fetchSignUp } from '../../api/authApi';
+import sha256 from 'crypto-js/sha256';
+import { Facebook, Twitter, LinkedIn } from '@mui/icons-material';
+import HomeIcon from '@mui/icons-material/Home';
 
 const RegisterForm = ({ handleAfterRegister }) => {
     const {registerState, setError, handleSubmit, getValues, setValue, formState: { errors }} = useHookForm({});
     const { setLoader } = useLoader();
-
     const onSubmit = async (data) => {
         try {
             setLoader();
-            await fetchSignUp(data);
+            console.log('data register', data)
+            await fetchSignUp({
+                ...data,
+                password: sha256(data.password).toString(),
+                password_repeat:  sha256(data.password_repeat).toString()
+            });
             toast.success("Your account has been registered to the platform and will go through an approval process!");
             handleAfterRegister();
         } catch(e) {
@@ -63,9 +70,38 @@ const RegisterForm = ({ handleAfterRegister }) => {
     }
 
     const validateRepeatPassword = (repeatPsw, psw) => {
-        console.log('psw', psw)
         if(repeatPsw.trim().toLowerCase() !== psw.trim().toLowerCase()) {
             return 'The passwords do not match!';
+        }
+
+        return null;
+    }
+
+    const validateSocialURL = (url = null, social = "") => {
+        if(!url) return null;
+
+        const fbUrlRegex = /^https?:\/\/(?:www\.)?facebook\.com\/(?:\w+\/)*\w+(?:\/)?$/;
+        const twitterUrlRegex = /^https?:\/\/(?:www\.)?twitter\.com\/(?:#!\/)?\w+(?:\/)?$/;
+        const linkedinUrlRegex = /^https?:\/\/(?:[\w]+\.)?linkedin\.com\/(?:[\w]+\.)?[\w-]+\/?(?:\?.*)?$/;
+
+        if(social === "facebook" && !fbUrlRegex.test(url)) {
+            return "The link is not correct!";
+        } else if(social === "twitter" && !twitterUrlRegex.test(url)) {
+            return "The link is not correct!";
+        } else if(social === "linkedin" && !linkedinUrlRegex.test(url)) {
+            return "The link is not correct!";
+        }
+      
+        return null;
+    }
+
+    const validatePersonalSite = (url) => {
+        if(!url) return;
+
+        const websiteUrlRegex = /^https?:\/\/(?:[\w]+\.)?[\w-]+\.[\w]{2,6}(?:\/\S*)?$/;
+
+        if(!websiteUrlRegex.test(url)) {
+            return "The link is not correct!";
         }
 
         return null;
@@ -203,6 +239,90 @@ const RegisterForm = ({ handleAfterRegister }) => {
                 </Grid>
                 <Grid item xs={12}>
                     <HookTextField 
+                        {...registerState('facebook_profile')}
+                        label="Facebook profile link"
+                        textFieldProps={{
+                            label: 'Facebook profile link',
+                            variant: 'outlined',
+                            type: "text",
+                            fullWidth: true,
+                            InputProps: {
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                      <Facebook color="primary" />
+                                    </InputAdornment>
+                                )
+                            }
+                        }}
+                        rules={{
+                            validate: (url) => validateSocialURL(url, "facebook")
+                        }} />
+                </Grid>
+                <Grid item xs={12}>
+                    <HookTextField 
+                        {...registerState('twitter_profile')}
+                        label="Twitter profile link"
+                        textFieldProps={{
+                            label: 'Twitter profile link',
+                            variant: 'outlined',
+                            type: "text",
+                            fullWidth: true,
+                            InputProps: {
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                      <Twitter color="primary" />
+                                    </InputAdornment>
+                                )
+                            }
+                        }}
+                        rules={{
+                            validate: (url) => validateSocialURL(url, "twitter")
+                        }} />
+                </Grid>
+                <Grid item xs={12}>
+                    <HookTextField 
+                        {...registerState('linkedin_profile')}
+                        label="Linkedin profile link"
+                        textFieldProps={{
+                            label: 'Linkedin profile link',
+                            variant: 'outlined',
+                            type: "text",
+                            fullWidth: true,
+                            InputProps: {
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                      <LinkedIn color="primary" />
+                                    </InputAdornment>
+                                )
+                            }
+                        }}
+                        rules={{
+                            validate: (url) => validateSocialURL(url, "linkedin")
+                        }} />
+                </Grid>
+                <Grid item xs={12}>
+                    <HookTextField 
+                        {...registerState('personal_site')}
+                        label="Personal site link"
+                        textFieldProps={{
+                            label: 'Personal site link',
+                            variant: 'outlined',
+                            type: "text",
+                            fullWidth: true,
+                            InputProps: {
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                      <HomeIcon color="primary" />
+                                    </InputAdornment>
+                                )
+                            }
+                        }}
+                        rules={{
+                            validate: (url) => validatePersonalSite(url)
+                        }} />
+                </Grid>
+                <Grid item xs={12}>
+                    <HookTextField 
                         {...registerState('otherInfo')}
                         textFieldProps={{
                             label: 'Description of your CV',
@@ -224,8 +344,8 @@ const RegisterForm = ({ handleAfterRegister }) => {
                                 message: 'Please enter something',
                             }, 
                             minLength: {
-                                value: 15,
-                                message: 'Please enter at least 15 characters'
+                                value: 150,
+                                message: 'Please enter at least 150 characters'
                             },
                             maxLength: {
                                 value: 512,

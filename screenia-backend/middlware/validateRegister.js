@@ -57,9 +57,9 @@ module.exports = validateRegister = (req, res, next) => {
         "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})"
     );
 
-    if(!strongRegex.test(body.password)) return res.status(400).send({
+    /*if(!strongRegex.test(body.password)) return res.status(400).send({
         message: 'The password is not secure!'
-    });
+    });*/
 
     next();
 }

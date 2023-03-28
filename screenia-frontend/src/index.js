@@ -17,7 +17,7 @@ root.render(
     <RecoilRoot>
       <ThemeProvider theme={theme}>
         <BrowserRouter basename="/screenia">
-          <React.Suspense fallback={<div>Loading...</div>}>
+          <React.Suspense fallback={null}>
             <App />
           </React.Suspense>
         </BrowserRouter>

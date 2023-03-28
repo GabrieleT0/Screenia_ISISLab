@@ -14,6 +14,7 @@ import AlternateEmailIcon from '@mui/icons-material/AlternateEmail';
 import KeyIcon from '@mui/icons-material/Key';
 import authTokenAtom from '../../state/authToken/authTokenAtom';
 import jwtDecode from 'jwt-decode';
+import sha256 from 'crypto-js/sha256';
 
 const LoginForm = () => {
     const {registerState, setError, handleSubmit, getValues, setValue, formState: { errors }} = useHookForm({});
@@ -27,14 +28,15 @@ const LoginForm = () => {
     const onSubmit = async (data) => {
         try {
             setLoader();
-            const response = await fetchLogin(data);
-            toast.success("OK!")
+            const response = await fetchLogin({
+                ...data,
+                password: sha256(data.password).toString()
+            });
 
             if(!response?.data?.id) {
                 throw new Error();
             }
 
-            //setUserLocalStorage(response.data);
             setAuthToken(response.data.accessToken);
             setUser(response.data);
 

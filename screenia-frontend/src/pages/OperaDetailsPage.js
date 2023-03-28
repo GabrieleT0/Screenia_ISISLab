@@ -8,7 +8,9 @@ import {
     FormControlLabel, 
     FormGroup,
     Switch,
-    Button
+    Button,
+    TextField,
+    IconButton
 } from "@mui/material";
 import { useEffect, useState, useCallback, useRef, createRef } from "react";
 import { useParams } from "react-router-dom";
@@ -24,17 +26,57 @@ import CommentContainer from "../components/Comment/CommentContainer";
 import BasicMenu from "../components/BasicMenu/BasicMenu";
 import SimpleDialog from "../components/Dialog/SimpleDialog";
 import CommentParagraph from "../components/Comment/CommentParagraph";
-import { Link, Element, Events, animateScroll as scroll, scrollSpy, scroller } from 'react-scroll'
+import scrollIntoView from "scroll-into-view-if-needed";
+import { 
+    selectorAuthorsOfOpera, 
+    selectorBooksOfOpera, 
+    selectorChaptersOfBook, 
+    selectorEditionsOfOpera, 
+    selectorParagraphsOfChapter 
+} from "../state/opera/opereSelector";
+import { useRecoilCallback, useRecoilState, useRecoilValue } from "recoil";
+import { operaDetailsAtom, syncTextCommentOpera } from "../state/opera/opereAtom";
+import useCommentsChapter from '../customHooks/operaHooks/useCommentsChapter';
+import TagAutocomplete from "../components/Tag/TagAutocomplete";
+import CloseIcon from '@mui/icons-material/Close';
+import { styled } from '@mui/material/styles';
+import authTokenAtom from "../state/authToken/authTokenAtom";
+import { userAtom } from "../state/user/userAtom";
+import { getCommentsSelector } from "../state/comment/commentSelector";
+import { commentAtom } from "../state/comment/commentAtom";
+import useOperaDetails from "../customHooks/operaHooks/useOperaDetails";
+import { getParagraphsSelector } from "../state/paragraph/paragraphSelector";
+import { paragraphAtom } from "../state/paragraph/paragraphAtom";
+import useComponentByUserRole from "../customHooks/authHooks/useComponentByRole";
+import { startTransition } from "react";
+import useLoader from "../customHooks/loaderHooks/useLoader";
 
-const SelectBook = ({ books = [], value, handleSelect }) => {
+const CloseButtonFilteredComment = styled(IconButton)(({ theme }) => ({
+    position: "relative",
+    marginLeft: '100%',
+    marginTop: -50,
+}));
+
+const SelectBook = ({ books = [], value = 1, handleSelect }) => {
+    const [isOpen, setIsOpen] = useState(false);
+
+    const handleSelectChange = (event) => {
+        setIsOpen(false);
+        handleSelect(event.target.value);
+    };
+
     return (
         <FormControl fullWidth>
             <InputLabel id="select-book-opera" shrink={true}>Select Book</InputLabel>
             <Select
+                open={isOpen}
+                key={value}
                 labelId="select-book-opera"
                 id="select-book-opera"
                 label="Age"
-                onChange={handleSelect}
+                onClose={() => setIsOpen(false)}
+                onOpen={() => setIsOpen(true)}
+                onChange={handleSelectChange}
                 value={value}
                 sx={{
                     background: "#fff"
@@ -49,183 +91,156 @@ const SelectBook = ({ books = [], value, handleSelect }) => {
     )
 }
 
+const FilteredComment = ({ handleSave }) => {
+    const [tagSelected, setTagSelected] = useState([]);
+    const [username, setUsername] = useState("");
+
+    const handleSelectTags = useCallback((items) => {
+        setTagSelected(items);
+    });
+
+    const handleChangeUsername = useCallback((event) => {
+        setUsername(event.target.value)
+    });
+
+    const onSearch = () => {
+        const tagsTitlte = tagSelected.map(( { title }) => title)
+        handleSave(username, tagsTitlte);
+        setTagSelected([]);
+        setUsername("");
+    }
+
+    return (
+        <Paper elevation={2} style={{ padding: 7 }}>
+            <Grid
+                container
+                direction="row"
+                spacing={2} >
+                <Grid item xs={4}>
+                    <TagAutocomplete 
+                        value={tagSelected} 
+                        handleSelect={handleSelectTags} />
+                </Grid>
+                <Grid item xs={2}>
+                    <TextField 
+                        id="filter_comment_user" 
+                        label="Commentator" 
+                        variant="outlined" 
+                        value={username} 
+                        onChange={handleChangeUsername} />
+                </Grid>
+                <Grid item xs={2} style={{ display: 'flex', justifyContent: 'center', }}>
+                    <Button
+                        size="small"
+                        onClick={onSearch}
+                        variant="outlined" >
+                        Search
+                    </Button>
+                </Grid>
+            </Grid>
+        </Paper>
+    )
+}
+
 const OperaDetailsPage = () => {
+    //Params url
     const { id } = useParams();
     const { paramIdBook } = useParams();
     const { paramIdChapter } = useParams();
     const { paramIdParagraph } = useParams();
-    const [opera, setOpera] = useState({});
-    const [books, setBooks] = useState([]);
+
+    //Local state
     const [bookId, setBookId] = useState(null);
-    const [chaptersOfBook, setChaptersOfBook] = useState([]);
-    const [chapterId, setChapterId] = useState();
-    const [paragraphs, setParagraphs] = useState([]);
-    const [authors, setAuthors] = useState([]);
-    const [editions, setEditions] = useState([]);
+    const [chapterId, setChapterId] = useState(null);
     const [authorSelected, setAuthorSelected] = useState(null);
     const [editionSelected, setEditionSelected] = useState(null);
-    const [comments, setComments] = useState(null);
-    const [openDialogComment, setOpenDialogComment] = useState(false);
-    const [isSyncTextComment, setIsSyncTextComment] = useState(true);
     const [paragraphId, setParapraghId] = useState(null);
-    const commentRef = useRef();
-    const containerCommentRef = useRef();
-    const [refsComments, setRefsComments] = useState();
+    const [isSyncTextComment, setIsSyncTextComment] = useRecoilState(syncTextCommentOpera);
+    const [commentUpdate, setCommentUpdate] = useState(null);
+
     const itemsMenu = [
         { 
             title: `Download text Chapter #${chapterId}`, 
             action: () => downloadParagraphTxtFile(chapterId, paragraphs)
-        },
-        {
-            title: `Comment Book #${bookId} - Chapter #${chapterId}`,
-            action: () => handleDialogComment(true)
         }
     ];
+
+    //Global State and Call API
+    const [authToken, setAuthToken] = useRecoilState(authTokenAtom);
+    const [user, setUser] = useRecoilState(userAtom);
+    const { books, authors, editions } = useOperaDetails();
+    const chaptersOfBook = useRecoilValue(selectorChaptersOfBook(bookId));
+    const { setLoader } = useLoader();
+
+    const comments = useRecoilValue(getCommentsSelector);
+    const [commentFilter, setCommentFilter] = useRecoilState(commentAtom);
+    const paragraphs = useRecoilValue(getParagraphsSelector);
+    const [paragraphFilter, setParagraphFilter] = useRecoilState(paragraphAtom);
+
+    const isUserAccessAddComment = useComponentByUserRole(
+        authToken, 
+        ["admin", "editor"], 
+        user?.role || null);
+
+
+    const fetchOperaDetails = useRecoilCallback(({ set }) => async (id) => {
+        try {
+            setLoader();
+            const responseOpera = await fetchOpera(id);
+            const responseBooks = await fetchBooksByOpera(id);
+            //const responseAuthors = await fetchAllAuthorByOpera(id);
+            //const responseEditions = await fetchAllEditionByOpera(id);
+    
+            set(operaDetailsAtom, { 
+                ...responseOpera.data,
+                books: [...responseBooks.data],
+                //editions: [...responseAuthors.data],
+                //authors: [...responseEditions.data]
+            });
+        } catch(e) {
+            return toast.error("Unable to upload the work. Please contact the administration!");
+        } finally {
+            setLoader();
+        }
+    });
     
     useEffect(() => {
-        fetchAllData()
+        initialLoad();
     }, [id, paramIdBook, paramIdChapter, paramIdParagraph]);
 
-    /*useEffect(() => {
-        if(!paramIdParagraph || !paragraphs || paragraphs.length === 0) return;
+    useEffect(() => {
+        console.log('paragraphs', paragraphs)
+    }, [paragraphs]);
 
-        const elementParagraph = document.getElementById(
-            `paragraph-${id}-${paramIdBook}-${paramIdChapter}-${paramIdParagraph}`);
-            
-        if(!elementParagraph) return;
-        console.log('elementParagraph', elementParagraph)
-        scrollIntoView(elementParagraph, {
-            block: 'nearest',
-            inline: 'start',
-            behavior: 'smooth',
+    useEffect(() => {
+        setParapraghId(0);
+        setParagraphFilter({
+            idOpera: id,
+            idBook: bookId,
+            idChapter: chapterId,
         })
-        //elementParagraph.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }, [paramIdParagraph, paragraphs])*/
+        setCommentFilter({
+            idOpera: id,
+            idBook: bookId,
+            idChapter: chapterId,
+            filter: null 
+        })
+    }, [chapterId, bookId])
 
-    useEffect(() => {
-        selectBook()
-    }, [bookId])
-
-    useEffect(() => {
-        fetchParagraphByChapter()
-        fetchCommentByChapter()
-    }, [chapterId])
-
-    useEffect(() => {
-        if(!id || !bookId || !chapterId) return;
-
-        if(isSyncTextComment) {
-            document.getElementById("container_paragraph").scrollTop = 0;
-            document.getElementById("container_comment").scrollTop = 0;
-
-            const paragraphElementOne = document.getElementById(
-                `paragraph-${id}-${bookId}-${chapterId}-1`);
-
-            paragraphElementOne.style.backgroundColor = "#00bcd442";
-        } else if(
-            !isSyncTextComment 
-            && Array.isArray(paragraphs) 
-            && paragraphs.length > 0) {
-            for(const paragraph of paragraphs) {
-                const { id_opera, number_book, number_chapter, number } = paragraph;
-
-                const pragraphElement = document.getElementById(
-                    `paragraph-${id_opera}-${number_book}-${number_chapter}-${number}`);
-
-                pragraphElement.style.backgroundColor = null;
-            }
-        } else {
-            
-        }
-    }, [isSyncTextComment])
-
-    useEffect(() => {
-        if(Array.isArray(comments) && comments.length > 0) {
-            setRefsComments(comments.reduce((acc, value) => {
-                acc[value.number_paragraph] = createRef();
-                return acc;
-            }, {}));
-        }
-    }, [comments])
-
-    const fetchAllData = async () => {
-        if(id === null) return;
-
-        try {
-            const responseOpera = await fetchOpera(id);
-            const responseBook = await fetchBooksByOpera(id);
-            const responseAuthors = await fetchAllAuthorByOpera(id);
-            const responseEditions = await fetchAllEditionByOpera(id);
-
-            if(!responseOpera.error 
-                && !responseBook.error 
-                && !responseAuthors.error
-                && !responseEditions.error) {
-                setOpera(responseOpera.data);
-                setBooks(responseBook.data);
-                setAuthors(responseAuthors.data);
-                setEditions(responseEditions.data);
-                if(responseBook.data.length > 0) {
-                    setBookId(paramIdBook ? parseInt(paramIdBook) : 1);
-                }
-            }
-        } catch(e) {
-            toast.error("Impossibile recuperare i dati. Contattare l'amministrazione!");
-        }
+    const initialLoad = () => {
+        fetchOperaDetails(id);
+        setBookId(paramIdBook || 1);
+        setChapterId(paramIdChapter || 1);
     }
 
-    const selectBook = () => {
-        if(bookId === null) return;
-
-        const bookFind = books.find(({ number }) => parseInt(number) === parseInt(bookId));
-        if(bookFind.chapters.length > 0) {
-            setChaptersOfBook(bookFind.chapters)
-            setChapterId(paramIdChapter ? parseInt(paramIdChapter) : 1);
-            fetchParagraphByChapter()
-            fetchCommentByChapter()
-        }
-    }
-
-    const handleSelectBook = useCallback((e) => {
-        setBookId(e.target.value);
-        setParapraghId(null);
+    const handleSelectBook = useCallback((value) => {
+        setBookId(value);
+        setChapterId(1);
     })
 
     const handleSelectChapter = useCallback((e, value) => {
         setChapterId(value);
-        setParapraghId(null);
     })
-
-    const fetchParagraphByChapter = async () => {
-        if(!id || !bookId || !chapterId) return;
-
-        try {
-            const response = await fetchParagraph(id, bookId, chapterId);
-            setParagraphs(response.data || []);
-
-            if(!response?.data || response.data.length === 0) {
-                toast.info(`Non ci sono paragrafi per il capitolo #${chapterId} #${bookId}!`);
-            }
-        } catch(e) {
-            toast.error("Impossibile recuperare i paragrafi. Contattare l'amministrazione!");
-        }
-    }
-
-    const fetchCommentByChapter = async () => {
-        if(!bookId || !chapterId) return;
-
-        const response = await fetchAllComment(id, bookId, chapterId);
-        setComments(response.data.comments || []);
-        if(!response.data || (Array.isArray(response.data) && response.data.length === 0)) {
-            setIsSyncTextComment(false);
-        } else if(
-            response.data 
-            && Array.isArray(response.data) 
-            && response.data.length > 0
-            && isSyncTextComment) {
-                setIsSyncTextComment(true);
-        }
-    }
 
     const downloadParagraphTxtFile = (chapterId, paragraphs = []) => {
         if(!chapterId || !paragraphs || paragraphs.length === 0) {
@@ -241,17 +256,28 @@ const OperaDetailsPage = () => {
         element.click();
     }
 
-    const handleDialogComment = () => {
-        setOpenDialogComment(lastValue => !lastValue);
-    }
-
-    const handlePostCommentSubmit = () => {
-        handleDialogComment();
-        fetchCommentByChapter();
-    }
-
     const handleCommentParagraph = (id) => {
         setParapraghId(id);
+    }
+
+    const serachCommentByFilter = (username = "", tags = []) => {
+        setCommentFilter({
+            idOpera: id,
+            idBook: bookId,
+            idChapter: chapterId,
+            filter: {
+                user: username,
+                tags: [...tags]
+            } 
+        })
+    }
+
+    const handleUpdateComment = (commentOnPassed) => {
+        if(!commentOnPassed) return;
+
+        console.log('commentOnPassed', commentOnPassed)
+
+        setCommentUpdate({ ...commentOnPassed });
     }
 
     return (
@@ -259,29 +285,6 @@ const OperaDetailsPage = () => {
             container
             direction="row"
             spacing={2} >
-                                        <Button onClick={() => {
-        scroller.scrollTo('#comment-paragraph_3', {
-          duration: 1500,
-          delay: 100,
-          smooth: true,
-          containerId: 'container_comment',
-          offset: 50
-        })
-      }}>Clicca qui library</Button>
-            {openDialogComment && (
-                <SimpleDialog
-                    open={openDialogComment}
-                    title="Insert a comment"
-                    handleClose={handleDialogComment} >
-                    <CommentForm
-                        idOpera={id}
-                        idBook={bookId}
-                        idChapter={chapterId}
-                        paragraphs={paragraphs ? paragraphs.map((items) => items.number) : []}
-                        handlePostSubmit={handlePostCommentSubmit}
-                    />
-                </SimpleDialog>
-            )}
             {authorSelected && (
                 <FullScreenDialog 
                     title={`Author Details`}
@@ -313,15 +316,18 @@ const OperaDetailsPage = () => {
             <Grid item xs={12}>
                 <FormGroup sx={{ float: "right" }}>
                     <FormControlLabel
+                        label="Synchronized scroll"
                         control={
                             <Switch 
                                 disabled={!comments || comments.length === 0}
                                 color="secondary"
                                 checked={isSyncTextComment} 
                                 onChange={e => setIsSyncTextComment(e.target.checked)} />}
-                        label="Synchronized scroll"
                     />
                 </FormGroup>
+            </Grid>
+            <Grid item xs={12}>
+                <FilteredComment handleSave={serachCommentByFilter} />
             </Grid>
             <Grid item xs={12} md={8}>
                 <Paper style={{ height: 550, marginTop: 15 }}>
@@ -330,15 +336,14 @@ const OperaDetailsPage = () => {
                         paragraphs={paragraphs}
                         value={chapterId} 
                         handleSelect={handleSelectChapter}
-                        handleCommentParagraph={handleCommentParagraph} 
-                        isSyncTextComment={isSyncTextComment} />
+                        handleCommentParagraph={handleCommentParagraph} />
                 </Paper>
             </Grid>
             <Grid item xs={12} md={4}>
                 <CommentContainer 
                     comments={comments} 
                     paragraphs={paragraphs} 
-                    refsComments={refsComments} />
+                    handleUpdateComment={handleUpdateComment} />
             </Grid>
             {/*<Grid item xs={12} md={6}>
                 <CardAuthor authors={authors} handleSelect={(author) => setAuthorSelected(author)} />
@@ -346,18 +351,21 @@ const OperaDetailsPage = () => {
             <Grid item xs={12} md={6}>
                 <CardEdition editions={editions} handleSelect={(edition) => setEditionSelected(edition)}/>
             </Grid>*/}
-            <Grid item xs={12}>
-                <CommentParagraph 
-                    opera={{
-                        idOpera: id,
-                        idBook: bookId,
-                        idChapter: chapterId,
-                        idParagraph: paragraphId
-                    }}/>
-            </Grid>
+            {isUserAccessAddComment &&
+                (<Grid item xs={12}>
+                    <CommentParagraph 
+                        opera={{
+                            idOpera: id,
+                            idBook: bookId,
+                            idChapter: chapterId,
+                            idParagraph: paragraphId
+                        }}
+                        paragraphs={paragraphs} 
+                        commentUpdate={commentUpdate} 
+                        handleResetUpdateComment={() => setCommentUpdate(null)} />
+                </Grid>)}
         </Grid>
     )
 }
 
 export default OperaDetailsPage;
-

@@ -1,3 +1,4 @@
+import { useCallback, useEffect, useState } from "react";
 import {
     Grid,
     Avatar,
@@ -12,15 +13,15 @@ import { convertFromRaw } from 'draft-js';
 import DraftEditor from '../RichText/DraftEditor';
 import EditIcon from '@mui/icons-material/Edit';
 import MeetingRoomIcon from '@mui/icons-material/MeetingRoom';
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useRecoilState, useRecoilValue } from "recoil";
 import authTokenAtom from "../../state/authToken/authTokenAtom";
 import { userAtom } from "../../state/user/userAtom";
 import { fetchCreateRoom } from "../../api/opereApi";
-import { useCallback } from "react";
 import useLoader from "../../customHooks/loaderHooks/useLoader";
 import confirmModalAtom from "../../state/modal/confirmModalAtom";
 import { red, green } from '@mui/material/colors';
+import uuid from 'react-uuid';
 
 const Comment = ({ opera, comment, handleUpdateComment }) => {
     const { idOpera, idBook, idChapter, idParagraph } = opera;
@@ -43,12 +44,20 @@ const Comment = ({ opera, comment, handleUpdateComment }) => {
     const { setLoader } = useLoader();
     //Confirm Modal State
     const [modal, setModal] = useRecoilState(confirmModalAtom);
+    const [editor, setEditor] = useState(null);
+    const navigate = useNavigate();
 
-    console.log('prova', JSON.parse(text))
+    useEffect(() => {
+        if(comment && text) {
+        setEditor(EditorState.createWithContent(
+            convertFromRaw(JSON.parse(text))
+        ))
+        }
+    }, [comment])
 
     const handleClickRoom = useCallback(() => {
         if(idRoom) {
-
+            navigate(`/room/${idRoom}`);
         } else {
             console.log('modale room')
 
@@ -125,14 +134,12 @@ const Comment = ({ opera, comment, handleUpdateComment }) => {
                         ))}
                     </Grid>
                     <DraftEditor
-                        editor={() => EditorState.createWithContent(
-                            convertFromRaw(JSON.parse(text))
-                        )}
+                        editorKey={uuid()}
+                        editor={editor}
                         readOnly={true}
                         idOpera={idOpera} 
                         idComment={idComment} 
-                        referenceToComment={referenceToComment} 
-                        isMentionsComment={true} />
+                        referenceToComment={referenceToComment} />
                 </Grid>
         </Grid>
         </Element>
