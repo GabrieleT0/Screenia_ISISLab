@@ -8,7 +8,7 @@ import verifyToken from "../../middlware/verifyToken";
 
 router.get(
   '/search',
-  (req, res, next) => verifyToken(req, res, next, ["admin"]),
+  (req, res, next) => verifyToken(req, res, next, ["user", "admin", "editor"]),
   searchTagsByTitle
 );
 

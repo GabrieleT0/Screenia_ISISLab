@@ -86,7 +86,7 @@ const generateCommentReferences = (comments = []) => {
               reference_to_comment: comment.id,
               insert_date: comment.insert_date,
               tags: [...comment.tags],
-              user: {...comment.user.dataValues}
+              user: {...comment.user}
             })
           }
         }

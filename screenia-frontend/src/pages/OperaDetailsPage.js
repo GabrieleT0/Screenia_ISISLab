@@ -51,12 +51,6 @@ import useComponentByUserRole from "../customHooks/authHooks/useComponentByRole"
 import { startTransition } from "react";
 import useLoader from "../customHooks/loaderHooks/useLoader";
 
-const CloseButtonFilteredComment = styled(IconButton)(({ theme }) => ({
-    position: "relative",
-    marginLeft: '100%',
-    marginTop: -50,
-}));
-
 const SelectBook = ({ books = [], value = 1, handleSelect }) => {
     const [isOpen, setIsOpen] = useState(false);
 
@@ -116,12 +110,12 @@ const FilteredComment = ({ handleSave }) => {
                 container
                 direction="row"
                 spacing={2} >
-                <Grid item xs={4}>
+                <Grid item xs={12} md={4}>
                     <TagAutocomplete 
                         value={tagSelected} 
                         handleSelect={handleSelectTags} />
                 </Grid>
-                <Grid item xs={2}>
+                <Grid item xs={12} md={2}>
                     <TextField 
                         id="filter_comment_user" 
                         label="Commentator" 
@@ -129,7 +123,7 @@ const FilteredComment = ({ handleSave }) => {
                         value={username} 
                         onChange={handleChangeUsername} />
                 </Grid>
-                <Grid item xs={2} style={{ display: 'flex', justifyContent: 'center', }}>
+                <Grid item xs={2} style={{ display: 'flex', justifyContent: 'flex-start', }}>
                     <Button
                         size="small"
                         onClick={onSearch}
@@ -265,7 +259,7 @@ const OperaDetailsPage = () => {
             idOpera: id,
             idBook: bookId,
             idChapter: chapterId,
-            filter: {
+            filters: {
                 user: username,
                 tags: [...tags]
             } 

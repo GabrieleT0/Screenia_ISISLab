@@ -22,6 +22,7 @@ import useLoader from "../../customHooks/loaderHooks/useLoader";
 import confirmModalAtom from "../../state/modal/confirmModalAtom";
 import { red, green } from '@mui/material/colors';
 import uuid from 'react-uuid';
+import { commentAtom } from "../../state/comment/commentAtom";
 
 const Comment = ({ opera, comment, handleUpdateComment }) => {
     const { idOpera, idBook, idChapter, idParagraph } = opera;
@@ -42,10 +43,11 @@ const Comment = ({ opera, comment, handleUpdateComment }) => {
     const authToken = useRecoilValue(authTokenAtom);
     const userLogged = useRecoilValue(userAtom);
     const { setLoader } = useLoader();
-    //Confirm Modal State
     const [modal, setModal] = useRecoilState(confirmModalAtom);
     const [editor, setEditor] = useState(null);
     const navigate = useNavigate();
+    const [commentFilter, setCommentFilter] = useRecoilState(commentAtom); //Set comment filter for reload comments
+
 
     useEffect(() => {
         if(comment && text) {
@@ -76,6 +78,14 @@ const Comment = ({ opera, comment, handleUpdateComment }) => {
             await fetchCreateRoom({
                 comment_paragraph_id: idComment
             });
+
+
+            setCommentFilter({
+                idOpera,
+                idBook,
+                idChapter,
+                filters: null
+            })
         } catch(e) {
             console.log('Error: ', e)
         } finally {

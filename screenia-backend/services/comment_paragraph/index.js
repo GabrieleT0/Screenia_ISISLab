@@ -36,7 +36,7 @@ const findAllComment = async (conditions, username, tags) => {
                 },
                 {
                     model: user,
-                    required: false,
+                    required: true,
                     attributes: ["id", "name", "surname"],
                     where: {
                         [Op.or]: [
