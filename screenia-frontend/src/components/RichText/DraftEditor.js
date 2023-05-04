@@ -44,8 +44,8 @@ function Entry(props) {
     const {
         mention,
         theme,
-        searchValue, // eslint-disable-line @typescript-eslint/no-unused-vars
-        isFocused, // eslint-disable-line @typescript-eslint/no-unused-vars
+        searchValue,
+        isFocused,
         ...parentProps
     } = props;
 
