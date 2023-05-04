@@ -12,7 +12,7 @@ module.exports = function(sequelize, DataTypes) {
     },
     category: {
         type: DataTypes.ENUM({
-            values: ['concepts', 'models']
+            values: ['concepts', 'methods']
           }),
         allowNull: false
     },

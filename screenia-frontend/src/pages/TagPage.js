@@ -119,7 +119,7 @@ const TagForm = ({ reloadTags = null }) => {
                         items={[
                             { label: "", value: "" },
                             { label: "Concepts", value: "concepts" },
-                            { label: "Models", value: "models" }
+                            { label: "Methods", value: "methods" }
                         ]}
                         rules={{
                             required: {
