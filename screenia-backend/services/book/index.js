@@ -19,7 +19,7 @@ const getAllBookByOpera = async (idOpera) => {
                         id_opera: idOpera,
                         number_book: Sequelize.col('book.number')
                     }*/
-                    where: Sequelize.literal('chapters.id_opera = Book.id_opera AND chapters.number_book = Book.number')
+                    where: Sequelize.literal('chapters.id_opera = book.id_opera AND chapters.number_book = book.number')
                 }
             ]
         })
