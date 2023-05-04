@@ -52,7 +52,9 @@ router.post('/login', validateLogin ,async function (req, res, next) {
 
         //One minute expires for test: new Date(Number(new Date())+ 1 * 60 * 1000)
         //3h expires: new Date(Number(new Date()) + (3600*3)*1000)
-        res.cookie('token', accessToken, { httpOnly: true, secure: true, SameSite: 'strict' , expires: new Date(Number(new Date()) + (3600*3)*1000) });
+
+        //TO DO: SameSite: 'strict'
+        res.cookie('token', accessToken, { httpOnly: true, secure: true, SameSite: 'Lax' , expires: new Date(Number(new Date()) + (3600*3)*1000) });
 
         const userData = {
             id: user.id,
