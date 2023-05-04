@@ -156,8 +156,9 @@ export default function DraftEditor({
         setOpen(_open);
     }, []);
 
-    const onSearchChange = useCallback(
+    /*const onSearchChange = useCallback(
         _.debounce(async ({ trigger, value }) => {
+            console.log('MAMMT', trigger)
             if(trigger === "/out") {
                 const dataOutMention = await fetchOutMentions(idOpera, value);
                 setSuggestions(dataOutMention.map((item) => ({
@@ -178,7 +179,29 @@ export default function DraftEditor({
                 })));
             }
         }, 500) // intervallo di 500ms
-    , []);
+    , []);*/
+
+    const onSearchChange = useCallback(async ({ value, trigger }) => {
+            if(trigger === "/out") {
+                const dataOutMention = await fetchOutMentions(idOpera, value);
+                setSuggestions(dataOutMention.map((item) => ({
+                    ...item,
+                    type: "out"
+                })));
+            } else if(trigger === "/in") {
+                const dataInMention = await fetchInMentions(idOpera, value);
+                setSuggestions(dataInMention.map((item) => ({
+                    ...item,
+                    type: "in"
+                })));
+            } else if(trigger === "/comment") {
+                const dataComment = await fetchCommentMentions(idOpera, value);
+                setSuggestions(dataComment.map((item) => ({
+                    ...item,
+                    type: "comment"
+                })));
+            }
+      }, []);
 
     const fetchOutMentions = async (idOpera, searchTerm) => {
         const response = await fetchAutocompleteOutRichText(idOpera, searchTerm);

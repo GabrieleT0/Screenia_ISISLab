@@ -222,7 +222,7 @@ const storeArchiveOpera = async (filePathOpera, callback) => {
                 });
             }
             
-            itemParagraph.contents.map((content, index) => { 
+            itemParagraph.contents.map((content, index) => {
                 //Recupero la label, cioé il testo che sta prima del carattere "#" (se presente)
                 let labelParagraph = null;
                 let contentParagraph = null;

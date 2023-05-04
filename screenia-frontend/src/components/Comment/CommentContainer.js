@@ -15,9 +15,8 @@ import { EditorState } from 'draft-js';
 import { convertFromRaw } from 'draft-js';
 import DraftEditor from '../RichText/DraftEditor';
 import Comment from "./Comment";
- /*height: '70vh'*/
 
-const getJsonRichTextReferenceToMultipleComment = (mention = null) => {  
+/*const getJsonRichTextReferenceToMultipleComment = (mention = null) => {  
     if(!mention || !mention.id || !mention.name || !mention.link) return null;
   
     const text = `Refer to the comment by ${mention.name}`;
@@ -57,6 +56,28 @@ const getJsonRichTextReferenceToMultipleComment = (mention = null) => {
          }
       }
    }
+}*/
+
+const getJsonRichTextReferenceToMultipleComment = (mention = null) => {  
+    if(!mention || !mention.id || !mention.name || !mention.link) return null;
+  
+    const text = `Refer to the comment by ${mention.name}`;
+    return {
+        ops: [
+            {
+                insert: {
+                    mention: {
+                        index: 0,
+                        denotationChar: "",
+                        id: mention.id,
+                        value: text,
+                        link: mention.link,
+                        refType: "comment_multiple_reference"
+                    }
+                }
+            }
+        ]
+    }   
 }
 
 const generateCommentReferences = (comments = []) => {
@@ -71,7 +92,7 @@ const generateCommentReferences = (comments = []) => {
             const jsonMultipleComment = getJsonRichTextReferenceToMultipleComment({ 
               id: `${comment.id_opera}, ${comment.number_book}, ${comment.number_chapter}, ${comment.number_paragraph}`,
               name: `${comment.user.name} ${comment.user.surname}, paragraph ${comment.label ? comment.label : comment.number_paragraph}`,
-              link: `${comment.id_opera}, ${comment.number_book}, ${comment.number_chapter}, ${comment.number_paragraph}`
+              link: `${comment.id_opera}/${comment.number_book}/${comment.number_chapter}/${comment.number_paragraph}/${comment.id}`
             });
   
             newComments.push({
@@ -104,14 +125,14 @@ const CommentContainer = ({ comments = [], paragraphs = [], handleUpdateComment 
             (<List 
                 sx={{ height: '10000px', '& ul': { padding: 0 }}}
                 subheader={<li />}>
-                {paragraphs.map(({ number, number_book, number_chapter, id_opera }) => {
+                {paragraphs.map(({ number, label }) => {
                     const commentsByParagraph = commentsView.filter(
                         ({ number_paragraph }) => parseInt(number) === number_paragraph);
                     return (
                         <>
-                            <Element name={`#comment-paragraph_${number}`}>
+                            <Element name={`comment-paragraph_${number}`}>
                                 <ListSubheader>
-                                    {`Paragraph #${number}`}
+                                    {`Comments of the paragraph with label ${label}`}
                                 </ListSubheader>
                             </Element>
                             {commentsByParagraph.length === 0 && (
@@ -135,7 +156,8 @@ const CommentContainer = ({ comments = [], paragraphs = [], handleUpdateComment 
                                 to_paragraph,
                                 reference_to_comment,
                                 parent_id,
-                                room
+                                room,
+                                impact
                             }, index) => (
                                 <li key={`section-${number_paragraph}`}>
                                     <ul>
@@ -159,7 +181,8 @@ const CommentContainer = ({ comments = [], paragraphs = [], handleUpdateComment 
                                                         referenceToComment: reference_to_comment,
                                                         idParent: parent_id,
                                                         idUser: user.id,
-                                                        idRoom: room && room.id ? room.id : null
+                                                        idRoom: room && room.id ? room.id : null,
+                                                        impact: impact
                                                     }} 
                                                     handleUpdateComment={handleUpdateComment} />
                                         </ListItem>

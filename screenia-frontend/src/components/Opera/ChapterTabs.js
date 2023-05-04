@@ -78,13 +78,12 @@ const ParagraphText = ({ paragraphs, number, value, handleCommentParagraph }) =>
     const { inView, entry } = options;
 
     if(inView) {
-      console.log('number', number)
-      scroller.scrollTo(`#comment-paragraph_${number}`, {
+      scroller.scrollTo(`comment-paragraph_${number}`, {
         duration: 1500,
         delay: 100,
         smooth: true,
         containerId: 'container_comment',
-        offset: 50
+        offset: 0
       })
     }
   }
@@ -98,7 +97,9 @@ const ParagraphText = ({ paragraphs, number, value, handleCommentParagraph }) =>
           return (
             <InView 
               root={document.getElementById(`paragraph_box`)} 
-              as="div" 
+              as="div"
+              onWheel={(e) => e.stopPropagation()}
+              id={`paragraph-${number}`}
               onChange={isSyncTextComment ? 
                 (inView, entry) => 
                   handleChangeInView(
@@ -109,20 +110,9 @@ const ParagraphText = ({ paragraphs, number, value, handleCommentParagraph }) =>
                   <b>{`${labelParagraph}`}</b>{text}
                 </p>
               </Typography>
-              {/*<CommentsParagraph paragraph={paragraph} />*/}
             </InView>
           )
       })}
-
-<Button onClick={() => {
-        scroller.scrollTo('#par3', {
-          duration: 1500,
-          delay: 100,
-          smooth: true,
-          containerId: 'container_paragraph',
-          offset: 50
-        })
-      }}>Clicca qui library</Button>
     </TabPanel>
   )
 }

@@ -18,18 +18,9 @@ import { convertFromRaw } from 'draft-js';
 import moment from "moment";
 import PriorityHighIcon from '@mui/icons-material/PriorityHigh';
 import uuid from "react-uuid";
+import { getHtmlComment } from "../../utils/quillRichTextUtils";
 
 const MessageDiscussion = ({ message }) => {
-  const [editor, setEditor] = useState(null);
-
-  useEffect(() => {
-    if(message && message.text) {
-      setEditor(EditorState.createWithContent(
-        convertFromRaw(JSON.parse(message.text))
-      ))
-    }
-  }, [message])
-
   return (
     <Grid
       container
@@ -40,7 +31,7 @@ const MessageDiscussion = ({ message }) => {
       <Grid item>
         <Stack direction="row" alignItems="center" gap={1}>
           <Avatar sx={{ bgcolor: (theme) => theme.palette.secondary.main }}>
-            {`${message.user.name.substring(0, 1)}${message.user.surname.substring(0, 1)}`}
+            {`${message.user.name.charAt(0)}${message.user.surname.charAt(0)}`}
           </Avatar>
           <Typography
             fontWeight="bold"
@@ -53,30 +44,25 @@ const MessageDiscussion = ({ message }) => {
         </Stack>
       </Grid>
       <Grid item>
-        <DraftEditor
+        {/*<DraftEditor
           editorKey={uuid()}
           editor={editor}
           readOnly={true}
           idOpera={180} 
           idComment={129} 
           referenceToComment={null} 
-          simpleEditor={true} />
+          simpleEditor={true} />*/}
+          <Typography 
+          variant="body1" 
+          component="div" 
+          style={{ maxHeight: 100, overflowY: "auto" }}
+          dangerouslySetInnerHTML={{ __html: getHtmlComment(JSON.parse(message.text).ops) }} />
       </Grid>
     </Grid>
   )
 }
 
 const MessageComment = ({ message }) => {
-  const [editor, setEditor] = useState(null);
-
-  useEffect(() => {
-    if(message && message.text) {
-      setEditor(EditorState.createWithContent(
-        convertFromRaw(JSON.parse(message.text))
-      ))
-    }
-  }, [message])
-
   return (
     <Grid
       container
@@ -87,7 +73,7 @@ const MessageComment = ({ message }) => {
       <Grid item>
         <Stack direction="row" alignItems="center" gap={1}>
           <Avatar sx={{ bgcolor: (theme) => theme.palette.secondary.main }}>
-            {`${message.user.name.substring(0, 1)}${message.user.surname.substring(0, 1)}`}
+            {`${message.user.name.charAt(0)}${message.user.surname.charAt(0)}`}
           </Avatar>
           <Typography
             fontWeight="bold"
@@ -112,18 +98,23 @@ const MessageComment = ({ message }) => {
         )}
       </Grid>
       <Grid item>
-        {message.tags.map((tag) => (
-            <Chip label={tag} style={{ margin: 3 }}/>
+        {message.tags.map(({ title }) => (
+            <Chip label={title} style={{ margin: 3 }}/>
         ))}
       </Grid>
       <Grid item>
-        <DraftEditor
+        {/*<DraftEditor
           editorKey={uuid()}
           editor={editor}
           readOnly={true}
           idOpera={180} 
           idComment={129} 
-          referenceToComment={null} />
+        referenceToComment={null} />*/}
+        <Typography 
+          variant="body1" 
+          component="div" 
+          style={{ maxHeight: 100, overflowY: "auto" }}
+          dangerouslySetInnerHTML={{ __html: getHtmlComment(JSON.parse(message.text).ops) }} />
       </Grid>
     </Grid>
   )

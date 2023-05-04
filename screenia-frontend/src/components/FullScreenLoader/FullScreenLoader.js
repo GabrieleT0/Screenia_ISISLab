@@ -1,15 +1,24 @@
 import ReactDOM from 'react-dom';
 import { Backdrop, CircularProgress } from "@mui/material"
+import { useEffect, useState } from 'react';
 
-const FullScreenLoader = ({ isOpenLoader }) => isOpenLoader ? ReactDOM.createPortal(
-    <>
+const FullScreenLoader = ({ isOpenLoader }) => {
+    const [isLoading, setIsLoading] = useState(false);
+  
+    useEffect(() => {
+      setIsLoading(isOpenLoader);
+    }, [isOpenLoader]);
+  
+    return isLoading ? ReactDOM.createPortal(
+      <>
         <Backdrop
-            sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
-            open={isOpenLoader}
+          sx={{ color: '#fff', zIndex: 9999 }}
+          open={isLoading}
         >
-            <CircularProgress color="primary" />
+          <CircularProgress color="primary" />
         </Backdrop>
-        </>, document.body
-) : null;
+      </>, document.body
+    ) : null;
+  };
 
 export default FullScreenLoader;

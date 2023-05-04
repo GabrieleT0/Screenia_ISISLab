@@ -27,6 +27,7 @@ import TagAutocomplete from '../Tag/TagAutocomplete';
 import { convertFromRaw } from 'draft-js';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import { commentAtom } from '../../state/comment/commentAtom';
+import QuillRichText from '../QuillRichText/QuillRichText';
 
 const CommentParagraph = ({ 
     opera = null,
@@ -44,7 +45,7 @@ const CommentParagraph = ({
         plainText: "",
         convertToRaw: {}
     });
-    const [editor, setEditor] = useState(() => EditorState.createEmpty());
+    //const [editor, setEditor] = useState(() => EditorState.createEmpty());
     const [fromRange, setFromRange] = useState(0);
     const [toRange, setToRange] = useState(0);
     const [typeUpdate, setTypeUpdate] = useState(null);
@@ -60,33 +61,37 @@ const CommentParagraph = ({
     }, [idOpera, idBook, idChapter]);
 
     useEffect(() => {
-        if(toRange) return;
+        if((!fromRange || !fromRange.number) || (toRange && toRange.number)) return;
 
-        setToRange(fromRange);
+        setToRange({ number: fromRange.number, label: fromRange.label });
     }, [fromRange])
 
     useEffect(() => {
         if(!commentUpdate || !commentUpdate.idComment) return;
 
-        const commentFrom = commentUpdate.from ? commentUpdate.from : commentUpdate.idParagraph;
-        const commentTo = commentUpdate.to ? commentUpdate.to : commentUpdate.idParagraph;
+        const commentFrom = commentUpdate.from 
+            ? { number: commentUpdate.from, label: commentUpdate.from } 
+            : { number: commentUpdate.idParagraph, label: commentUpdate.label };
+        const commentTo = commentUpdate.from 
+            ? { number: commentUpdate.to, label: commentUpdate.to } 
+            : { number: commentUpdate.idParagraph, label: commentUpdate.label };
+
+            console.log('commentFrom and to', commentFrom, commentTo)
+
         handleSetRange(commentFrom, "from")
         handleSetRange(commentTo, "to")
-        setEditor(() => EditorState.createWithContent(
+        /*setEditor(() => EditorState.createWithContent(
             convertFromRaw(JSON.parse(commentUpdate.text))
-        ));
+        ));*/
+        setTextEditor({
+            plainText: commentUpdate.flat_text,
+            convertToRaw: JSON.parse(commentUpdate.text)
+        });
         setTagSelected([...commentUpdate.tags])
     }, [commentUpdate]);
 
     const handleSelectTags = useCallback((items) => {
         setTagSelected(items);
-    })
-
-    const handleChangeEditor = useCallback((plainText, convertToRaw) => {
-        setTextEditor({
-            plainText,
-            convertToRaw
-        })
     })
 
     const handleConfirmSubmitComment = () => {
@@ -116,10 +121,10 @@ const CommentParagraph = ({
             idOpera: opera.idOpera,
             idBook: opera.idBook,
             idChapter: opera.idChapter,
-            idParagraph: toRange,
+            idParagraph: toRange.number,
             tags: tagSelected.map(({ title }) => title),
-            from: fromRange,
-            to: toRange,
+            from: fromRange.label,
+            to: toRange.label,
             flatText: textEditor.plainText,
             idParent: idParent,
             impact: typeUpdate
@@ -153,10 +158,9 @@ const CommentParagraph = ({
             plainText: "",
             convertToRaw: {}
         });
-        setEditor(() => EditorState.createEmpty());
         setTagSelected([]);
-        setFromRange(0);
-        setToRange(0);
+        setFromRange(null);
+        setToRange(null);
         setTypeUpdate(null);
 
         if(commentUpdate && commentUpdate.idComment) {
@@ -164,31 +168,33 @@ const CommentParagraph = ({
         }
     }
 
+    useEffect(() => { console.log('fromRange', fromRange)}, [fromRange])
+
     const handleSetRange = (value, range) => {
         if(range === "from") {
-            setFromRange(parseInt(value));
+            setFromRange({ ...value });
         } else if(range === "to") {
-            setToRange(parseInt(value));
+            setToRange({ ...value });
         }
     }
 
     const validateComment = () => {
         if(!textEditor.plainText.trim()) {
-            toast.warning("Non è possibile inviare un commento vuoto!");
+            toast.warning("It is not possible to post a blank comment!");
             return false;
         } else if(textEditor.plainText.trim().length < 5) {
             toast.warning("Per inviare un commento bisogna inserire almeno cinque caratteri!");
             return false;
         }
 
-        if(parseInt(fromRange) > parseInt(toRange)) {
-            toast.warning("Il range per commentare paragrafi multipli non è valido!");
+        if(parseInt(fromRange.number) > parseInt(toRange.number)) {
+            toast.warning("You must enter at least five characters to post a comment!");
             return false;
         }
 
         if(commentUpdate && commentUpdate.idComment) {
             if(!typeUpdate) {
-                toast.warning("Devi selezionare l'impatto della modifica!");
+                toast.warning("You have to select the impact of the change!");
                 return false;
             }
         }
@@ -197,26 +203,48 @@ const CommentParagraph = ({
     }
 
     const getParagraphsMenuSelect = () => {
-        return paragraphs.map(({ number }) => (
-            <MenuItem value={number}>{number}</MenuItem>
+        return paragraphs.map(({ number, label }) => (
+            <MenuItem value={{ number, label }}>{label}</MenuItem>
         ))
     }
 
     const getDescription = () => {
+
         if(!commentUpdate || !commentUpdate.idComment) {
-            if(fromRange === toRange) {
-                return `You are commenting on paragraph number: ${fromRange ? `${fromRange}` : ""}`;
-            } 
+            if(!fromRange || !fromRange.number || !toRange || !toRange.number) {
+                return "Select the paragraphs to be commented on. If you want to comment on only one paragraph, <i><strong>From</strong></i> and <i><strong>To</strong></i> must be the same.";
+            }
 
-            return `You are commenting from paragraph ${fromRange} to paragraph ${toRange}`;
-        } else if(commentUpdate.idComment) {
-            if(fromRange === toRange) {
-                return `You are editing a paragraph comment number: ${fromRange}`;
-            } 
-
-            return `You are editing a comment from paragraph ${fromRange} to paragraph ${toRange}`;
+            if(fromRange && toRange && fromRange.number && toRange.number) {
+                if(parseInt(fromRange.number) === parseInt(toRange.number)) {
+                    return `You are commenting on paragraph with label: ${fromRange && fromRange.label ? `<i><strong>${fromRange.label}</strong></i>` : ""}`;
+                } 
+    
+                return `You are commenting from paragraph with label <i><strong>${fromRange.label}</strong></i> to paragraph with label <i><strong>${toRange.label}</strong></i>`;
+            }
+        } else if(commentUpdate && commentUpdate.idComment) {
+            if(fromRange && toRange && fromRange.number && toRange.number) {
+                if(parseInt(fromRange.number) === parseInt(toRange.number)) {
+                    return `You are editing a paragraph comment number: <i><strong>${fromRange.label}`;
+                } 
+    
+                return `You are editing a comment from paragraph <i><strong>${fromRange.label}</strong></i> to paragraph <i><strong>${toRange.label}</strong></i>`;
+            }
         }
+
+        return "";
     }
+
+    const handleChangeContentEditor = (contentToRaw, text) => {
+        setTextEditor({
+            plainText: text,
+            convertToRaw: contentToRaw
+        })
+    }
+
+    useEffect(() => {
+        console.log('change editor', textEditor);
+    }, [textEditor])
 
     return (
         <Paper sx={{ padding: 2 }}>
@@ -225,7 +253,9 @@ const CommentParagraph = ({
                 direction="row"
                 spacing={2} >
                 <Grid item xs={12}>
-                    <Typography style={{ float: "left" }} >{getDescription()}</Typography>
+                    <Typography style={{ float: "left" }} >
+                        <div dangerouslySetInnerHTML={{ __html: getDescription() }} />
+                    </Typography>
                     <Button 
                         variant="outlined" 
                         startIcon={<RestartAltIcon />} 
@@ -242,8 +272,25 @@ const CommentParagraph = ({
                             labelId="From"
                             id="from"
                             value={fromRange}
+                            renderValue={(value) => value.label}
                             label="From"
                             disabled={(commentUpdate && commentUpdate.idComment)}
+                            MenuProps={{ 
+                                anchorOrigin: {
+                                    vertical: 'bottom',
+                                    horizontal: 'left',
+                                },
+                                transformOrigin: {
+                                    vertical: 'top',
+                                    horizontal: 'left',
+                                },
+                                getContentAnchorEl: null,
+                                PaperProps: {
+                                    style: {
+                                        maxHeight: 200, // imposta l'altezza massima del menu
+                                    },
+                                },
+                            }}
                             onChange={(event) => handleSetRange(event.target.value, "from")} >
                                 {getParagraphsMenuSelect()}
                         </Select>
@@ -256,7 +303,24 @@ const CommentParagraph = ({
                             labelId="to"
                             id="from"
                             value={toRange}
+                            renderValue={(value) => value.label}
                             label="To"
+                            MenuProps={{ 
+                                anchorOrigin: {
+                                    vertical: 'bottom',
+                                    horizontal: 'left',
+                                },
+                                transformOrigin: {
+                                    vertical: 'top',
+                                    horizontal: 'left',
+                                },
+                                getContentAnchorEl: null,
+                                PaperProps: {
+                                    style: {
+                                        maxHeight: 200, // imposta l'altezza massima del menu
+                                    },
+                                },
+                            }}
                             onChange={(event) => handleSetRange(event.target.value, "to")} >
                                 {getParagraphsMenuSelect()}
                         </Select>
@@ -281,19 +345,23 @@ const CommentParagraph = ({
                     <TagAutocomplete value={tagSelected} handleSelect={handleSelectTags} readOnly={false}/>
                 </Grid>
                 <Grid item xs={12}>
-                    <DraftEditor
+                    {/*<DraftEditor
                         editorKey="comment_paragraph_editor"
                         editor={editor}
                         readOnly={false}
                         idOpera={opera.idOpera} 
                         callbackChangeEditor={handleChangeEditor} 
-                        styleOptions={{ width: '100%', maxHeight: '200px', overflowY: 'scroll' }} />
+                        styleOptions={{ width: '100%', maxHeight: '200px', overflowY: 'scroll' }} />*/}
+                        <QuillRichText 
+                            idOpera={idOpera}
+                            content={textEditor.convertToRaw} 
+                            handleChangeContent={handleChangeContentEditor} />
                 </Grid>
                 <Grid item xs={12}>
                     <Button 
                         variant="contained" 
                         color="primary"
-                        disabled={!toRange}
+                        disabled={!fromRange || !toRange || !fromRange.number || !toRange.number}
                         onClick={handleConfirmSubmitComment}
                         style={{ float: "right" }}>
                         Save

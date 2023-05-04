@@ -18,11 +18,11 @@ router.post('/',
       return res.send(400, "Param idOpera is required!");
     }
 
-    if(!body.idBook) {
+    if(body.idBook === null || body.idBook === undefined) {
       return res.send(400, "Param idBook is required!");
     }
 
-    if(!body.idChapter) {
+    if(body.idChapter === null || body.idChapter === undefined) {
       return res.send(400, "Param idChapter is required!");
     }
 
@@ -93,12 +93,6 @@ router.post('/:idOpera/:idBook/:idChapter',
 
     try {
       const data = await CommentParagraphService.findAllComment({...params}, username, [...tags]);
-
-      const comments = [];
-
-      for(const comment of data) {
-        
-      }
 
       res.status(200).send(data);
     } catch(e) {

@@ -6,7 +6,15 @@ export const getParagraphsSelector = selector({
     key: 'getParagraphsSelector',
     get: async ({ get }) => {
         const paragraph = get(paragraphAtom);
-        if(!paragraph.idOpera || !paragraph.idBook || !paragraph.idChapter) {
+        if(!paragraph.idOpera) {
+            return [];
+        }
+
+        if(paragraph.idBook === null || paragraph.idBook === undefined) {
+            return [];
+        }
+
+        if(paragraph.idChapter === null || paragraph.idChapter === undefined) {
             return [];
         }
 

@@ -21,12 +21,12 @@ module.exports = function(sequelize, DataTypes) {
     },
     from_paragraph: {
       allowNull: true,
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING(255),
       defaultValue: 0
     },
     to_paragraph: {
       allowNull: true,
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING(255),
       defaultValue: 0
     },
     tag_update: {

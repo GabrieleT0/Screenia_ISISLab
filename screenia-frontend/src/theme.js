@@ -1,26 +1,3 @@
-/*export const themeOptions = {
-  palette: {
-    type: 'light',
-    primary: {
-      main: '#2196F3',
-    },
-    secondary: {
-      main: '#00bcd4',
-    },
-    info: {
-      main: '#1565c0',
-    },
-    success: {
-      main: '#2bb736',
-    },
-    error: {
-      main: '#e51b0f',
-    },
-    warning: {
-      main: '#ff8900',
-    },
-  },
-};*/
 import { createTheme } from '@mui/material';
 
 export const themeOptions = createTheme({
@@ -159,6 +136,30 @@ export const themeOptions = createTheme({
           boxShadow: "rgb(145 158 171 / 24%) 0px 0px 2px 0px, rgb(145 158 171 / 24%) 0px 16px 32px -4px"
         },
       }
+    },
+    MuiLink: {
+      styleOverrides: {
+        root: {
+          color: '#2196F3',
+          textDecoration: 'underline',
+          '&:visited': {
+            textDecoration: 'underline',
+          },
+        },
+      },
+    },
+    MuiTypography: {
+      styleOverrides: {
+        root: {
+          '& a': {
+            color: '#1976d2',
+            textDecoration: 'underline',
+            '&:visited': {
+              textDecoration: 'underline',
+            },
+          },
+        },
+      },
     }
   },
   palette: {

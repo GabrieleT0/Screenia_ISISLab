@@ -9,6 +9,7 @@ import { ThemeProvider } from '@mui/material';
 import Navbar from './components/Navbar/Navbar';
 import { createTheme } from '@mui/material';
 import { BrowserRouter } from 'react-router-dom';
+import FullScreenLoader from './components/FullScreenLoader/FullScreenLoader';
 
 const theme = createTheme(themeOptions);
 
@@ -17,9 +18,7 @@ root.render(
     <RecoilRoot>
       <ThemeProvider theme={theme}>
         <BrowserRouter basename="/screenia">
-          <React.Suspense fallback={null}>
             <App />
-          </React.Suspense>
         </BrowserRouter>
       </ThemeProvider>
     </RecoilRoot>

@@ -33,6 +33,7 @@ import uuid from 'react-uuid';
 import { EditorState } from 'draft-js';
 import confirmModalAtom from '../state/modal/confirmModalAtom';
 import { Contrast } from '@mui/icons-material';
+import QuillRichText from '../components/QuillRichText/QuillRichText';
 
 export default function DiscussionCommentPage() {
     const { idRoom } = useParams();
@@ -77,20 +78,20 @@ export default function DiscussionCommentPage() {
 
     const onSubmitDiscussion = useCallback(async () => {
         try {
+            handleChangeContentEditor({}, "");
             await fetchPostDiscussionByRoom({
                 text: JSON.stringify(textEditor.convertToRaw),
                 flat_text: textEditor.plainText,
                 room_id: idRoom
             });
 
-            resetAllParams()
-
             setRoom({
                 idRoom: idRoom,
                 filter: toggleDiscussion
             })
         } catch(e) {
-
+            console.log('Errore', e);
+            toast.error("Error in posting discussion. If the error persists, please contact the administration!");
         }
     })
 
@@ -117,14 +118,14 @@ export default function DiscussionCommentPage() {
         return true;
     }
 
-    const resetAllParams = () => {
-        setEditor(() => EditorState.createEmpty());
+    useEffect(() => console.log('OK RESET', textEditor), [])
 
+    const handleChangeContentEditor = useCallback((convertToRaw, plainText) => {
         setTextEditor({
-            plainText: "",
-            convertToRaw: {}
+            plainText,
+            convertToRaw
         })
-    }
+    })
 
     return (
         <>
@@ -173,13 +174,17 @@ export default function DiscussionCommentPage() {
                             justifyContent="flex-start"
                             alignItems="stretch" >
                                 <Grid item>
-                                    <DraftEditor
+                                    {/*<DraftEditor
                                         editorKey={uuid()}
                                         editor={editor}
                                         readOnly={false}
                                         disabledMension={true}
                                         callbackChangeEditor={handleChangeEditor} 
-                                        styleOptions={{ width: '100%', maxHeight: '200px', overflowY: 'scroll' }} />
+                    styleOptions={{ width: '100%', maxHeight: '200px', overflowY: 'scroll' }} />*/}
+                                <QuillRichText
+                                    content={textEditor.convertToRaw} 
+                                    handleChangeContent={handleChangeContentEditor}
+                                    disabledMension={true} />
                                 </Grid>
                                 <Grid item>
                                     <Button 

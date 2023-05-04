@@ -22,7 +22,7 @@ import { Container } from '@mui/material';
 import { BrowserRouter, Routes ,Route, Navigate } from 'react-router-dom';
 import OperePage from "../../pages/Opere";
 import { mainListItems } from './listItems';
-import OperaDetailsPage from '../../pages/OperaDetailsPage';
+//import OperaDetailsPage from '../../pages/OperaDetailsPage';
 import TagPage from '../../pages/TagPage';
 import AuthPage from "../../pages/Opere"
 import LoginRegister from '../Auth/LoginRegister';
@@ -35,6 +35,9 @@ import DiscussionCommentPage from '../../pages/DiscussionCommentPage';
 import UserApprovalePage from '../../pages/UserApprovalPage';
 import authTokenAtom from '../../state/authToken/authTokenAtom';
 import VerifyAccountPage from '../../pages/VerifyAccountPage';
+import FullScreenDialog from '../Dialog/FullScreenDialog';
+
+const OperaDetailsPageLazy = React.lazy(() => import('../../pages/OperaDetailsPage'));
 
 const drawerWidth = 240;
 
@@ -176,40 +179,16 @@ export default function Navbar() {
                   element={<VerifyAccountPage />}
                   exact
                 />
-                {/*<Route path="/opera">
-                  <Route path=":id" element={
-                    authToken 
-                    ? (<ProtectedRoute allowedRoles={["editor", "admin"]}>
-                        <OperaDetailsPageNew />
-                      </ProtectedRoute>)
-                    : <OperaDetailsPageNew />} >
-                    <Route path=":paramIdBook" element={
-                      authToken 
-                      ? (<ProtectedRoute allowedRoles={["editor", "admin"]}>
-                          <OperaDetailsPageNew />
-                        </ProtectedRoute>)
-                      : <OperaDetailsPageNew />} >
-                      <Route path=":paramIdChapter" element={
-                          authToken 
-                          ? (<ProtectedRoute allowedRoles={["editor", "admin"]}>
-                              <OperaDetailsPageNew />
-                            </ProtectedRoute>)
-                          : <OperaDetailsPageNew />} >
-                        <Route path=":paramIdParagraph" element={
-                          authToken 
-                          ? (<ProtectedRoute allowedRoles={["editor", "admin"]}>
-                              <OperaDetailsPageNew />
-                            </ProtectedRoute>)
-                          : <OperaDetailsPageNew />} />
-                      </Route>
-                    </Route>
-                  </Route>
-                </Route>*/}
-                <Route path="/opera">
-                  <Route path=":id" element={<OperaDetailsPage />} >
-                  </Route>
-                </Route>
-                <Route exact path="/room/:idRoom" element={<DiscussionCommentPage />}/>
+                <Route path="/opera/:id/:idBook?/:idChapter?" element={
+                  <React.Suspense fallback={<FullScreenDialog isOpenLoader={true} />}>
+                    <OperaDetailsPageLazy />
+                  </React.Suspense>
+                } />
+                  <Route exact path="/room/:idRoom" element={
+                    <React.Suspense fallback={<FullScreenDialog isOpenLoader={true} />}>
+                      <DiscussionCommentPage />
+                    </React.Suspense>
+                  }/>
               </Routes>
           </Container>
         </Main>

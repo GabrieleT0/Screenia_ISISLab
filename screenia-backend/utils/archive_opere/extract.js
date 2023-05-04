@@ -33,7 +33,7 @@ async function readOpera(filePath) {
           split = "\r\n\r\n";
         }
 
-        if(parseInt(path.parse(file).name)) {
+        if(!isNaN(parseInt(path.parse(file).name))) {
           paragrafhInBook.push({
             book: dir,
             chapter: path.parse(file).name,

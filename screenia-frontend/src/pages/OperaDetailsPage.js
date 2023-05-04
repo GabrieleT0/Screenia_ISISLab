@@ -10,9 +10,11 @@ import {
     Switch,
     Button,
     TextField,
-    IconButton
+    IconButton,
+    Box,
+    Fade
 } from "@mui/material";
-import { useEffect, useState, useCallback, useRef, createRef } from "react";
+import { useEffect, useState, useCallback, useRef, createRef, Suspense } from "react";
 import { useParams } from "react-router-dom";
 import { fetchAllAuthorByOpera, fetchAllComment, fetchAllEditionByOpera, fetchBooksByOpera, fetchOpera, fetchParagraph } from "../api/opereApi";
 import ChapterTabs from "../components/Opera/ChapterTabs";
@@ -50,6 +52,8 @@ import { paragraphAtom } from "../state/paragraph/paragraphAtom";
 import useComponentByUserRole from "../customHooks/authHooks/useComponentByRole";
 import { startTransition } from "react";
 import useLoader from "../customHooks/loaderHooks/useLoader";
+import QuillRichText from "../components/QuillRichText/QuillRichText";
+import { animateScroll } from 'react-scroll';
 
 const SelectBook = ({ books = [], value = 1, handleSelect }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -67,7 +71,7 @@ const SelectBook = ({ books = [], value = 1, handleSelect }) => {
                 key={value}
                 labelId="select-book-opera"
                 id="select-book-opera"
-                label="Age"
+                label="Book"
                 onClose={() => setIsOpen(false)}
                 onOpen={() => setIsOpen(true)}
                 onChange={handleSelectChange}
@@ -77,7 +81,8 @@ const SelectBook = ({ books = [], value = 1, handleSelect }) => {
                 }}
             >
                 {books.map(({ number, title }) => {
-                    const label = number && title ? `Book #${number} - ${title}` : `Book #${number}`
+                    console.log('title ci sta', title)
+                    const label = title ? `Book #${number} - ${title}` : `Book #${number}`
                     return (<MenuItem value={number}>{label}</MenuItem>)
                 })}
             </Select>
@@ -151,11 +156,16 @@ const OperaDetailsPage = () => {
     const [paragraphId, setParapraghId] = useState(null);
     const [isSyncTextComment, setIsSyncTextComment] = useRecoilState(syncTextCommentOpera);
     const [commentUpdate, setCommentUpdate] = useState(null);
+    const [showFiltersComment, setShowFiltersComment] = useState(false);
 
     const itemsMenu = [
         { 
             title: `Download text Chapter #${chapterId}`, 
             action: () => downloadParagraphTxtFile(chapterId, paragraphs)
+        },
+        { 
+            title: !showFiltersComment ? `View filters comments` : `Hide filters comments`, 
+            action: () => setShowFiltersComment((prev) => !prev)
         }
     ];
 
@@ -184,13 +194,17 @@ const OperaDetailsPage = () => {
             const responseBooks = await fetchBooksByOpera(id);
             //const responseAuthors = await fetchAllAuthorByOpera(id);
             //const responseEditions = await fetchAllEditionByOpera(id);
-    
-            set(operaDetailsAtom, { 
+
+            const operaDetailsResponse = { 
                 ...responseOpera.data,
                 books: [...responseBooks.data],
                 //editions: [...responseAuthors.data],
                 //authors: [...responseEditions.data]
-            });
+            }
+    
+            set(operaDetailsAtom, operaDetailsResponse);
+
+            return operaDetailsResponse;
         } catch(e) {
             return toast.error("Unable to upload the work. Please contact the administration!");
         } finally {
@@ -221,10 +235,26 @@ const OperaDetailsPage = () => {
         })
     }, [chapterId, bookId])
 
-    const initialLoad = () => {
-        fetchOperaDetails(id);
-        setBookId(paramIdBook || 1);
-        setChapterId(paramIdChapter || 1);
+    const initialLoad = async () => {
+        const operaDetails = await fetchOperaDetails(id);
+        const booksOperaDetails = operaDetails.books;
+        let findBookWithParam = null;
+        if(Array.isArray(booksOperaDetails) && booksOperaDetails && booksOperaDetails[0]) {
+
+            if(paramIdBook) {
+                findBookWithParam = booksOperaDetails.find((book) => parseInt(book.number) === parseInt(paramIdBook))
+            }
+            setBookId(findBookWithParam ? paramIdBook : booksOperaDetails[0].number);
+
+            if(Array.isArray(booksOperaDetails[0].chapters) && booksOperaDetails[0]?.chapters[0]?.number) {
+                let findChapterWithParam = null;
+
+                if(paramIdChapter && findBookWithParam) {
+                    findChapterWithParam = findBookWithParam.chapters.find((chapter) => parseInt(chapter.number) === parseInt(paramIdChapter))
+                }
+                setChapterId(findChapterWithParam ? paramIdChapter : booksOperaDetails[0]?.chapters[0]?.number);
+            }
+        }
     }
 
     const handleSelectBook = useCallback((value) => {
@@ -274,6 +304,14 @@ const OperaDetailsPage = () => {
         setCommentUpdate({ ...commentOnPassed });
     }
 
+    const handleSyncComment = (event) => {
+        const checked = event.target.checked;
+        setIsSyncTextComment(event.target.checked);
+        if(checked) {
+            animateScroll.scrollToTop({containerId: "container_paragraph"});
+        }
+    }
+
     return (
         <Grid
             container
@@ -301,12 +339,14 @@ const OperaDetailsPage = () => {
                     value={bookId} 
                     handleSelect={handleSelectBook} />
             </Grid>
-            <Grid item xs={2} />
-            {id && bookId && chapterId && 
-                (<Grid item xs={4}>
-                    <BasicMenu title="Actions" items={itemsMenu} sx={{ float: "right" }} />
-                </Grid>)
-            }
+            <Grid item xs={2}/>
+            <Grid item xs={4}>
+                <BasicMenu 
+                    disabled={(!id && !bookId && !chapterId)} 
+                    title="Actions" 
+                    items={itemsMenu} 
+                    sx={{ float: "right" }} />
+            </Grid>
             <Grid item xs={12}>
                 <FormGroup sx={{ float: "right" }}>
                     <FormControlLabel
@@ -316,13 +356,15 @@ const OperaDetailsPage = () => {
                                 disabled={!comments || comments.length === 0}
                                 color="secondary"
                                 checked={isSyncTextComment} 
-                                onChange={e => setIsSyncTextComment(e.target.checked)} />}
+                                onChange={handleSyncComment} />}
                     />
                 </FormGroup>
             </Grid>
-            <Grid item xs={12}>
-                <FilteredComment handleSave={serachCommentByFilter} />
-            </Grid>
+            <Fade in={showFiltersComment} appear={false} unmountOnExit={true}>
+                <Grid item xs={12}>
+                    <FilteredComment handleSave={serachCommentByFilter} />
+                </Grid>
+            </Fade>
             <Grid item xs={12} md={8}>
                 <Paper style={{ height: 550, marginTop: 15 }}>
                     <ChapterTabs

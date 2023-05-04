@@ -33,25 +33,28 @@ const selectorAuthorsOfOpera = selector({
 const selectorChaptersOfBook = selectorFamily({
     key: 'selectorChaptersOfBook',
     get: (idBook) => ({ get }) => {
-        if(!idBook) return [];
+        //if(idBook == false) return [];
+        console.log('ci sto in selectorChaptersOfBook', idBook)
 
         const opera = get(operaDetailsAtom);
         
         if(!opera || !opera.books) return [];
 
         const bookFind = opera.books.find(({ number }) => parseInt(number) === parseInt(idBook));
+        console.log('bookFind', bookFind)
 
         if(!bookFind || !bookFind.chapters) return [];
 
         return [...bookFind.chapters];
-    }
+    },
+    defaultValue: 0
 });
 
 const selectorParagraphsOfChapter = selectorFamily({
   key: 'selectorParagraphsOfChapter',
   get: (idOpera, idBook, idChapter) => async ({ get }) => {
     if(!idOpera || !idBook || !idChapter) return [];
-
+    
     try {
       const response = await fetchParagraph(idOpera, idBook, idChapter);
 

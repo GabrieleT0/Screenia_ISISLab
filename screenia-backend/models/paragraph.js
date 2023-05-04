@@ -47,7 +47,8 @@ module.exports = function(sequelize, DataTypes) {
     },
     label: {
       type: DataTypes.STRING(255),
-      allowNull: true
+      allowNull: true,
+      //unique: true
     }
   }, {
     sequelize,

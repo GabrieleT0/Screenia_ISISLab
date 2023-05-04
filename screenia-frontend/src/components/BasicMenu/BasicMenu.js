@@ -4,7 +4,7 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import { Typography } from '@mui/material';
 
-export default function BasicMenu({ title = "", items = [], sx = {} }) {
+export default function BasicMenu({ title = "", items = [], sx = {}, disabled = false }) {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
   const handleClick = (event) => {
@@ -24,6 +24,7 @@ export default function BasicMenu({ title = "", items = [], sx = {} }) {
         aria-expanded={open ? 'true' : undefined}
         onClick={handleClick}
         sx={sx}
+        disabled={disabled}
       >
         <Typography sx={{ color: "#fff" }}>{title}</Typography>
       </Button>
