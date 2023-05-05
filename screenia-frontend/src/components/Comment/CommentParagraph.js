@@ -60,14 +60,9 @@ const CommentParagraph = ({
     useEffect(() => {
         if(!commentUpdate || !commentUpdate.idComment) return;
 
-        const commentFrom = commentUpdate.from 
-            ? { number: commentUpdate.from, label: commentUpdate.from } 
-            : { number: commentUpdate.idParagraph, label: commentUpdate.label };
-        const commentTo = commentUpdate.from 
-            ? { number: commentUpdate.to, label: commentUpdate.to } 
-            : { number: commentUpdate.idParagraph, label: commentUpdate.label };
+        const commentFrom = { number: commentUpdate.from, label: commentUpdate.from };
+        const commentTo = { number: commentUpdate.to, label: commentUpdate.to };
 
-            console.log('comment from', commentUpdate )
         handleSetRange(commentFrom, "from")
         handleSetRange(commentTo, "to")
         /*setEditor(() => EditorState.createWithContent(
