@@ -125,10 +125,8 @@ const createComment = async (body, user = null) => {
             number_paragraph: body.idParagraph,
             insert_date: new Date(),
             user_id: user.id,
-            from_paragraph: 
-                (!body.from || parseInt(body.from) === parseInt(body.to)) ? null : body.from,
-            to_paragraph: 
-                (!body.to || parseInt(body.to) === parseInt(body.from)) ? null : body.to,
+            from_paragraph: body.from,
+            to_paragraph: body.to,
             flat_text: body.flatText,
             parent_id: body.idParent || null,
             impact: body.impact || null

@@ -1,16 +1,16 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import ReactQuill, { Quill } from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
 import 'quill-mention';
+import React, { useMemo, useRef, useState } from 'react';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
+import { toast } from 'react-toastify';
 import { fetchAutocompleteCommentRichText, fetchAutocompleteInRichText, fetchAutocompleteOutRichText } from '../../api/opereApi';
 import './styles.css';
-import { toast } from 'react-toastify';
 
 const formats = ["bold", "italic", "link", "list", "bullet", "mention"]
 
 const QuillRichText = ({ 
     idOpera,
-    content, 
+    content,
     handleChangeContent, 
     readOnly = false,
     disabledMention = false
@@ -76,14 +76,13 @@ const QuillRichText = ({
     return modulesOptions
   }, []);
 
-  useEffect(() => {
-    setValue(content);
-  }, [content])
-
   const handleChange = (content, delta, source, editor) => {
+    console.log('STO IN HANDLE')
     const contentToRaw = editor.getContents();
-    setValue(editor.getContents());
-    handleChangeContent(contentToRaw, getOnlyTextFromHTML(editor.getHTML()));
+    //setValue(editor.getContents());
+    if(contentToRaw) {
+      handleChangeContent(contentToRaw, getOnlyTextFromHTML(editor.getHTML()));
+    }
   };
 
   const getOnlyTextFromHTML = (html) => {
@@ -127,7 +126,7 @@ const QuillRichText = ({
       <ReactQuill
         ref={editorRef}
         readOnly={readOnly}
-        value={value}
+        value={content}
         modules={modules}
         formats={formats}
         onChange={!readOnly ? handleChange : null}

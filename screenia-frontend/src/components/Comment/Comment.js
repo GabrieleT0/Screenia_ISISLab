@@ -1,31 +1,25 @@
-import { useCallback, useEffect, useState } from "react";
-import {
-    Grid,
-    Avatar,
-    Chip,
-    Typography,
-    IconButton,
-    Paper
-} from "@mui/material";
-import moment from "moment";
-import { Element, animateScroll as scroll, scroller } from 'react-scroll';
-import { EditorState } from 'draft-js';
-import { convertFromRaw } from 'draft-js';
-import DraftEditor from '../RichText/DraftEditor';
 import EditIcon from '@mui/icons-material/Edit';
 import MeetingRoomIcon from '@mui/icons-material/MeetingRoom';
-import { Link, useNavigate } from "react-router-dom";
+import {
+    Avatar,
+    Chip,
+    Grid,
+    IconButton,
+    Paper,
+    Typography
+} from "@mui/material";
+import { green, red } from '@mui/material/colors';
+import moment from "moment";
+import { useCallback, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Element } from 'react-scroll';
 import { useRecoilState, useRecoilValue } from "recoil";
-import authTokenAtom from "../../state/authToken/authTokenAtom";
-import { userAtom } from "../../state/user/userAtom";
 import { fetchCreateRoom } from "../../api/opereApi";
 import useLoader from "../../customHooks/loaderHooks/useLoader";
-import confirmModalAtom from "../../state/modal/confirmModalAtom";
-import { red, green } from '@mui/material/colors';
-import uuid from 'react-uuid';
+import authTokenAtom from "../../state/authToken/authTokenAtom";
 import { commentAtom } from "../../state/comment/commentAtom";
-import PriorityHighIcon from '@mui/icons-material/PriorityHigh';
-import QuillRichText from "../QuillRichText/QuillRichText"; 
+import confirmModalAtom from "../../state/modal/confirmModalAtom";
+import { userAtom } from "../../state/user/userAtom";
 import { getHtmlComment } from "../../utils/quillRichTextUtils";
 
 const Comment = ({ opera, comment, handleUpdateComment }) => {
@@ -137,7 +131,7 @@ const Comment = ({ opera, comment, handleUpdateComment }) => {
                                     </p>
                             </Grid>)}
                         <Grid item>
-                            {parseInt(from) !== parseInt(to) && (
+                            {from !== to && (
                                 <Typography variant="caption" style={{ color: "#00000094" }}>
                                     Comment from paragraph <strong>{from}</strong> to <strong>{to}</strong>
                                 </Typography>

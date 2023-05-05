@@ -67,8 +67,7 @@ const CommentParagraph = ({
             ? { number: commentUpdate.to, label: commentUpdate.to } 
             : { number: commentUpdate.idParagraph, label: commentUpdate.label };
 
-            
-
+            console.log('comment from', commentUpdate )
         handleSetRange(commentFrom, "from")
         handleSetRange(commentTo, "to")
         /*setEditor(() => EditorState.createWithContent(
@@ -159,8 +158,6 @@ const CommentParagraph = ({
         }
     }
 
-    useEffect(() => { }, [fromRange])
-
     const handleSetRange = (value, range) => {
         if(range === "from") {
             setFromRange({ ...value });
@@ -232,10 +229,6 @@ const CommentParagraph = ({
             convertToRaw: contentToRaw
         })
     }
-
-    useEffect(() => {
-        
-    }, [textEditor])
 
     return (
         <Paper sx={{ padding: 2 }}>
