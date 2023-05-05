@@ -1,7 +1,9 @@
 import { 
     Autocomplete, 
+    LinearProgress, 
     TextField, 
-    Tooltip
+    Tooltip,
+    Typography
 } from '@mui/material';
 import PropTypes from 'prop-types';
 import { useCallback, useEffect, useState } from 'react';
@@ -12,23 +14,31 @@ import InfoIcon from '@mui/icons-material/Info';
 import _ from "lodash";
 
 const TagAutocomplete = ({ value = [], handleSelect = null, readOnly = false }) => {
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     const [tagValue, setTagValue] = useState("");
     const [tagsOptions, setTagsOptions] = useState([]);
 
+    const placeholderOption = {
+        title: 'Type to search for more tags...',
+        placeholder: true,
+        disabled: true
+    };
     const debouncedSearchTags = _.debounce((value) => searchTags(value), 1000);
+
+    useEffect(() => { 
+        searchTags("");
+    }, []);
 
     useEffect(() => {
         if(!tagValue) return;
+        setIsLoading(true);
 
         debouncedSearchTags(tagValue)
     }, [tagValue]);
 
     const searchTags = async (value) => {
-        if(!value) return;
 
         try {
-            setIsLoading(true);
             const response = await fetchTags(value);
             let options = [];
 
@@ -58,7 +68,10 @@ const TagAutocomplete = ({ value = [], handleSelect = null, readOnly = false }) 
             id="tags-comment"
             value={value}
             noOptionsText="Type something to search for a tag!"
-            options={tagsOptions.sort((a, b) => -b.category.localeCompare(a.category))}
+            options={[
+                ...tagsOptions.filter((option) => !option.placeholder),
+                placeholderOption
+            ].sort((a, b) => -b.category.localeCompare(a.category))}
             getOptionLabel={(option) => option.title}
             onChange={onChangeTag}
             style={{ maxWidth: 583 }}
@@ -80,20 +93,32 @@ const TagAutocomplete = ({ value = [], handleSelect = null, readOnly = false }) 
                         ...params.InputProps,
                         endAdornment: (
                         <>
-                            {isLoading ? <CircularProgress color="inherit" size={20} /> : null}
+                            {isLoading ? <CircularProgress color="primary" size={20} /> : null}
                             {params.InputProps.endAdornment}
                         </>
                         ),
                     }} />
             )}
-            renderOption={(props, option, { selected }) => (
-                <li {...props}>
-                    <Tooltip title={`${option.description ? option.description : ""}`}>
-                        <InfoIcon style={{ marginRight: 5 }} color="secondary" />
-                    </Tooltip>
-                    {option.title}
-                </li>
-            )}
+            renderOption={(props, option, { selected }) => {
+                if (option.placeholder) {
+                    return (
+                        <li {...props}>
+                            <Typography variant="caption">
+                                {option.title}
+                            </Typography>
+                        </li>
+                    );
+                } else {
+                    return (
+                        <li {...props}>
+                            <Tooltip title={`${option.description ? option.description : ""}`}>
+                                <InfoIcon style={{ marginRight: 5 }} color="secondary" />
+                            </Tooltip>
+                            {option.title}
+                        </li>
+                    )
+                }
+            }}
         />
     )
 }

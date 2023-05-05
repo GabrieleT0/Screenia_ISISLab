@@ -8,7 +8,9 @@ const getTagsByTitle = async (value = "") => {
                 title: {
                     [Op.like]: `%${value.trim()}%`
                 }
-            }
+            },
+            order: [['title', 'DESC']],
+            limit: 20
         });
 
         return tags;
