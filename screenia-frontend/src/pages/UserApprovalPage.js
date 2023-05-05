@@ -54,7 +54,7 @@ export default function UserApprovalePage() {
   }, [])
 
   useEffect(() => {
-    console.log('selectionModel', selectionModel)
+    
   }, [selectionModel])
 
   const getUsers = async () => {
@@ -70,7 +70,7 @@ export default function UserApprovalePage() {
   }
 
   const handleSelectionModelChange = (newSelection) => {
-    console.log(newSelection)
+    
     setSelectionModel(newSelection);
   };
 
@@ -84,12 +84,12 @@ export default function UserApprovalePage() {
 
   const handleApproveUsers = async () => {
     try {
-        console.log('ci sto', selectionModel)
+        
         await fetchPostApprovalUsers(selectionModel);
         await getUsers();
         setSelectionModel([]);
     } catch(e) {
-        console.log('error', e)
+        
     }
   }
 

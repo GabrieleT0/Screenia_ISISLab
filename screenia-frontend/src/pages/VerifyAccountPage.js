@@ -22,7 +22,7 @@ const VerifyAccountPage = () => {
                 setIsVerify(true);
             }
         } catch(e) {
-            console.log('Error: ', e);
+            
         }
     }
 

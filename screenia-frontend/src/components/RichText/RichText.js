@@ -32,10 +32,10 @@ export default function RichText({
 }) {
   const editor = useRef();
   const [authorMention, setAuthorMention] = useState(null);
-  console.log('editor', editor)
+  
 
   useEffect(() => {
-    console.log('editor', editor)
+    
     if(!editor) return;
     //editor.current.editor.getModule('mention').openMenu('-out')
     //editor.current.props.modules.mention.mentionDenotationChars=['x']
@@ -51,12 +51,12 @@ export default function RichText({
       mentionDenotationChars: ["-out", '/'],
       //selectKeys: [32],
       onSelect: function (item, insertItem) {
-        console.log('this', this.values);
+        
         handleSetAuthor(item.value)
         insertItem(item)
       },
       source: async function (searchTerm, renderList, mentionChar) {
-        console.log('ci sto')
+        
         if(mentionChar === "-out") {
           const values = await fetchMentions(searchTerm);
           this.values = values;
@@ -70,7 +70,7 @@ export default function RichText({
           values = [{ id: 1, value: "Opera 1"}, { id: 2, value: "Opera 2" }];
         }
 
-        console.log('searchTerm', searchTerm)
+        
 
         if (searchTerm.length === 0) {
           renderList(values, searchTerm);
@@ -99,7 +99,7 @@ export default function RichText({
   }, [defaultValue]);
 
   const fetchMentions = async (searchTerm) => {
-    console.log('searchTerm', searchTerm)
+    
     const response = await fetchAutocompleteOutRichText(searchTerm);
     const result = [];
     for(const author of response.data) {
@@ -138,7 +138,7 @@ export default function RichText({
                 }
             }
         }
-        console.log('res', result)
+        
     }
     return result;
   }
@@ -150,12 +150,12 @@ export default function RichText({
         theme={theme}
         modules={modules}
         /*onKeyUp={(e) => {
-          //console.log(e, editor);
+          //
           if (editor.current.editor) {
             const delta = editor.current.editor.getContents();
             const html = editor.current.editor.root.innerHTML;
             // onChange({ delta, html });
-            //console.log({ delta, html });
+            //
           }
         }}*/
       />

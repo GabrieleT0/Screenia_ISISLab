@@ -42,7 +42,7 @@ const LoginForm = () => {
 
             navigate(-1);
         } catch(e) {
-            console.log('e', e)
+            
             if(e.response && e.response?.data?.message) {
                 if(e.response.status === 401) {
                     return toast.warning(`${e.response.data.message}`)

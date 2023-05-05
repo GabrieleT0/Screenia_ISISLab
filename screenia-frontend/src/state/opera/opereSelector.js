@@ -34,14 +34,14 @@ const selectorChaptersOfBook = selectorFamily({
     key: 'selectorChaptersOfBook',
     get: (idBook) => ({ get }) => {
         //if(idBook == false) return [];
-        console.log('ci sto in selectorChaptersOfBook', idBook)
+        
 
         const opera = get(operaDetailsAtom);
         
         if(!opera || !opera.books) return [];
 
         const bookFind = opera.books.find(({ number }) => parseInt(number) === parseInt(idBook));
-        console.log('bookFind', bookFind)
+        
 
         if(!bookFind || !bookFind.chapters) return [];
 

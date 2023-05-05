@@ -24,7 +24,7 @@ router.get('/:idComment',
       
       res.status(200).send(comments);
     } catch(e) {
-      console.log('Error: ', e);
+      
 
       res.status(500).send({
         error: e,
@@ -162,7 +162,7 @@ router.post('/',
 
       res.status(200).send(commentReview);
     } catch(e) {
-      console.log('Error: ', e);
+      
 
       if(transaction) await transaction.rollback();
 

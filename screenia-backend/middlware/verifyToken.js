@@ -7,7 +7,7 @@ const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET;
 
 module.exports = async function verifyToken (req, res, next, roles = ["user", "editor", "admin"]){
     const token = req.cookies.token;
-    console.log('token', token)
+    
 
     if(!token){
         return res.status(401).send();

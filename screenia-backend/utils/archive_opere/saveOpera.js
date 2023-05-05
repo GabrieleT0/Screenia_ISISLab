@@ -16,7 +16,7 @@ import { readInfoOpera, readOpera } from './extract';
 
 const storeArchiveOpera = async (filePathOpera, callback) => {
     logger.info(`[STORE OPERA] - Start Path File: ${filePathOpera}`);
-    console.log('db', db)
+    
     const transaction = await db.sequelize.transaction();
 
     try {

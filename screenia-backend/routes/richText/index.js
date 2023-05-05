@@ -330,7 +330,7 @@ router.get('/comment', async function (req, res) {
 
         return res.send(result);
     } catch(e) {
-        console.log('Error: ', e);
+        
         return res.status(500).send(e.message);
     }
 });*/

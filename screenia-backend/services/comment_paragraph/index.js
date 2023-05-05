@@ -97,7 +97,7 @@ const findAllComment = async (conditions, username, tags) => {
 
         return result;
     } catch(error) {
-        console.log('error', error)
+        
         throw new Error(error.message)
     }
 }
@@ -193,7 +193,7 @@ const getCommentsRevisionById = async (idComment) => {
 
         return comment.get({ plain: true });
     } catch(error) {
-        console.log('error', error)
+        
         throw new Error(error.message)
     }
 }

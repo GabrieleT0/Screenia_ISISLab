@@ -23,7 +23,7 @@ const RegisterForm = ({ handleAfterRegister }) => {
     const onSubmit = async (data) => {
         try {
             setLoader();
-            console.log('data register', data)
+            
             await fetchSignUp({
                 ...data,
                 password: sha256(data.password).toString(),
@@ -35,7 +35,7 @@ const RegisterForm = ({ handleAfterRegister }) => {
             if(e?.response?.data?.message) {
                 return toast.error(`${e.response.data.message}`);
             }
-            console.log('Error', e);
+            
             return toast.error("Impossibile inviare i dati. Contattare l'amministrazione!")
         } finally {
             setLoader();
@@ -89,7 +89,7 @@ const RegisterForm = ({ handleAfterRegister }) => {
         } else if(social === "twitter" && !twitterUrlRegex.test(url)) {
             return "The link is not correct!";
         } else if(social === "linkedin" && !linkedinUrlRegex.test(url)) {
-            console.log('ok sto qui', url)
+            
             return "The link is not correct!";
         }
       

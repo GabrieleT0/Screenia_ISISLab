@@ -1,59 +1,44 @@
-import { 
-    Paper,
-    MenuItem, 
-    Grid,
-    FormControl,
-    InputLabel,
-    Select,
-    FormControlLabel, 
-    FormGroup,
-    Switch,
+import {
     Button,
-    TextField,
-    IconButton,
-    Box,
-    Fade
+    Fade,
+    FormControl,
+    FormControlLabel,
+    FormGroup,
+    Grid,
+    InputLabel,
+    MenuItem,
+    Paper,
+    Select,
+    Switch,
+    TextField
 } from "@mui/material";
-import { useEffect, useState, useCallback, useRef, createRef, Suspense } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { fetchAllAuthorByOpera, fetchAllComment, fetchAllEditionByOpera, fetchBooksByOpera, fetchOpera, fetchParagraph } from "../api/opereApi";
-import ChapterTabs from "../components/Opera/ChapterTabs";
-import { toast } from 'react-toastify';
-import FullScreenDialog from "../components/Dialog/FullScreenDialog";
-import CardAuthor from "../components/Opera/CardAuthor";
-import CardEdition from "../components/Opera/CardEdition";
-import AuthorDetails from "../components/Author/AuthorDetails";
-import EditionDetails from "../components/Edition/EditionDetails";
-import CommentContainer from "../components/Comment/CommentContainer";
-import BasicMenu from "../components/BasicMenu/BasicMenu";
-import SimpleDialog from "../components/Dialog/SimpleDialog";
-import CommentParagraph from "../components/Comment/CommentParagraph";
-import scrollIntoView from "scroll-into-view-if-needed";
-import { 
-    selectorAuthorsOfOpera, 
-    selectorBooksOfOpera, 
-    selectorChaptersOfBook, 
-    selectorEditionsOfOpera, 
-    selectorParagraphsOfChapter 
-} from "../state/opera/opereSelector";
-import { useRecoilCallback, useRecoilState, useRecoilValue } from "recoil";
-import { operaDetailsAtom, syncTextCommentOpera } from "../state/opera/opereAtom";
-import useCommentsChapter from '../customHooks/operaHooks/useCommentsChapter';
-import TagAutocomplete from "../components/Tag/TagAutocomplete";
-import CloseIcon from '@mui/icons-material/Close';
-import { styled } from '@mui/material/styles';
-import authTokenAtom from "../state/authToken/authTokenAtom";
-import { userAtom } from "../state/user/userAtom";
-import { getCommentsSelector } from "../state/comment/commentSelector";
-import { commentAtom } from "../state/comment/commentAtom";
-import useOperaDetails from "../customHooks/operaHooks/useOperaDetails";
-import { getParagraphsSelector } from "../state/paragraph/paragraphSelector";
-import { paragraphAtom } from "../state/paragraph/paragraphAtom";
-import useComponentByUserRole from "../customHooks/authHooks/useComponentByRole";
-import { startTransition } from "react";
-import useLoader from "../customHooks/loaderHooks/useLoader";
-import QuillRichText from "../components/QuillRichText/QuillRichText";
 import { animateScroll } from 'react-scroll';
+import { toast } from 'react-toastify';
+import { useRecoilCallback, useRecoilState, useRecoilValue } from "recoil";
+import { fetchBooksByOpera, fetchOpera } from "../api/opereApi";
+import AuthorDetails from "../components/Author/AuthorDetails";
+import BasicMenu from "../components/BasicMenu/BasicMenu";
+import CommentContainer from "../components/Comment/CommentContainer";
+import CommentParagraph from "../components/Comment/CommentParagraph";
+import FullScreenDialog from "../components/Dialog/FullScreenDialog";
+import EditionDetails from "../components/Edition/EditionDetails";
+import ChapterTabs from "../components/Opera/ChapterTabs";
+import TagAutocomplete from "../components/Tag/TagAutocomplete";
+import useComponentByUserRole from "../customHooks/authHooks/useComponentByRole";
+import useLoader from "../customHooks/loaderHooks/useLoader";
+import useOperaDetails from "../customHooks/operaHooks/useOperaDetails";
+import authTokenAtom from "../state/authToken/authTokenAtom";
+import { commentAtom } from "../state/comment/commentAtom";
+import { getCommentsSelector } from "../state/comment/commentSelector";
+import { operaDetailsAtom, syncTextCommentOpera } from "../state/opera/opereAtom";
+import {
+    selectorChaptersOfBook
+} from "../state/opera/opereSelector";
+import { paragraphAtom } from "../state/paragraph/paragraphAtom";
+import { getParagraphsSelector } from "../state/paragraph/paragraphSelector";
+import { userAtom } from "../state/user/userAtom";
 
 const SelectBook = ({ books = [], value = 1, handleSelect }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -81,7 +66,7 @@ const SelectBook = ({ books = [], value = 1, handleSelect }) => {
                 }}
             >
                 {books.map(({ number, title }) => {
-                    console.log('title ci sta', title)
+                    
                     const label = title ? `Book #${number} - ${title}` : `Book #${number}`
                     return (<MenuItem value={number}>{label}</MenuItem>)
                 })}
@@ -217,7 +202,7 @@ const OperaDetailsPage = () => {
     }, [id, paramIdBook, paramIdChapter, paramIdParagraph]);
 
     useEffect(() => {
-        console.log('paragraphs', paragraphs)
+        
     }, [paragraphs]);
 
     useEffect(() => {
@@ -299,7 +284,7 @@ const OperaDetailsPage = () => {
     const handleUpdateComment = (commentOnPassed) => {
         if(!commentOnPassed) return;
 
-        console.log('commentOnPassed', commentOnPassed)
+        
 
         setCommentUpdate({ ...commentOnPassed });
     }

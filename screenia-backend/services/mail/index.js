@@ -32,14 +32,12 @@ const sendMailVerifyAccount = (userEmail, token, name) => {
         operation.attempt((currentAttempt) => {
             transporter.sendMail(mailOptions, (error, info) => {
                 if (error) {
-                    console.log(`Errore nell'invio della mail (tentativo ${currentAttempt}): ${error.message}`);
                     if (operation.retry(error)) {
                         return;
                     }
-                    console.log(`Impossibile inviare la mail dopo ${currentAttempt} tentativi`);
+                    
                     return;
                 }
-                console.log(`Mail inviata con successo a ${info.envelope.to} (tentativo ${currentAttempt})`);
             });
         });
     } catch(error) {
@@ -67,14 +65,12 @@ const sendMailApprovedAccount = (userEmail, name) => {
         operation.attempt((currentAttempt) => {
             transporter.sendMail(mailOptions, (error, info) => {
                 if (error) {
-                    console.log(`Errore nell'invio della mail (tentativo ${currentAttempt}): ${error.message}`);
                     if (operation.retry(error)) {
                         return;
                     }
-                    console.log(`Impossibile inviare la mail dopo ${currentAttempt} tentativi`);
+                    
                     return;
                 }
-                console.log(`Mail inviata con successo a ${info.envelope.to} (tentativo ${currentAttempt})`);
             });
         });
     } catch(error) {

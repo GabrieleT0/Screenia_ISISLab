@@ -1,33 +1,24 @@
-import { 
-    Grid, 
-    Button, 
-    Paper, 
-    Typography, 
-    Autocomplete, 
-    TextField, 
-    Tooltip,
+import RestartAltIcon from '@mui/icons-material/RestartAlt';
+import {
+    Button,
     FormControl,
-    MenuItem,
+    Grid,
     InputLabel,
-    Select
+    MenuItem,
+    Paper,
+    Select,
+    Typography
 } from '@mui/material';
 import PropTypes from 'prop-types';
 import { useCallback, useEffect, useState } from 'react';
-import { fetchPostComment, fetchTags } from '../../api/opereApi';
-import DraftEditor from '../RichText/DraftEditor';
-import CircularProgress from '@mui/material/CircularProgress';
 import { toast } from 'react-toastify';
-import InfoIcon from '@mui/icons-material/Info';
-import useLoader from '../../customHooks/loaderHooks/useLoader';
-import { EditorState } from 'draft-js';
-import useCommentsChapter from '../../customHooks/operaHooks/useCommentsChapter';
 import { useRecoilState } from 'recoil';
-import confirmModalAtom from '../../state/modal/confirmModalAtom';
-import TagAutocomplete from '../Tag/TagAutocomplete';
-import { convertFromRaw } from 'draft-js';
-import RestartAltIcon from '@mui/icons-material/RestartAlt';
+import { fetchPostComment } from '../../api/opereApi';
+import useLoader from '../../customHooks/loaderHooks/useLoader';
 import { commentAtom } from '../../state/comment/commentAtom';
+import confirmModalAtom from '../../state/modal/confirmModalAtom';
 import QuillRichText from '../QuillRichText/QuillRichText';
+import TagAutocomplete from '../Tag/TagAutocomplete';
 
 const CommentParagraph = ({ 
     opera = null,
@@ -76,7 +67,7 @@ const CommentParagraph = ({
             ? { number: commentUpdate.to, label: commentUpdate.to } 
             : { number: commentUpdate.idParagraph, label: commentUpdate.label };
 
-            console.log('commentFrom and to', commentFrom, commentTo)
+            
 
         handleSetRange(commentFrom, "from")
         handleSetRange(commentTo, "to")
@@ -146,7 +137,7 @@ const CommentParagraph = ({
                 filters: null
             })
         } catch(e) {
-            console.log('Error', e);
+            
             toast.error("Impossibile inviare i dati. Contattare l'amministrazione!")
         } finally {
             setLoader();
@@ -168,7 +159,7 @@ const CommentParagraph = ({
         }
     }
 
-    useEffect(() => { console.log('fromRange', fromRange)}, [fromRange])
+    useEffect(() => { }, [fromRange])
 
     const handleSetRange = (value, range) => {
         if(range === "from") {
@@ -243,7 +234,7 @@ const CommentParagraph = ({
     }
 
     useEffect(() => {
-        console.log('change editor', textEditor);
+        
     }, [textEditor])
 
     return (

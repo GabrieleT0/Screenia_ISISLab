@@ -23,7 +23,7 @@ router.get('/:idRoom',
       
       res.status(200).send(room);
     } catch(e) {
-      console.log('Error: ', e);
+      
 
       res.status(500).send({
         error: e,
@@ -46,7 +46,7 @@ router.post('/',
 
       res.status(200).send();
     } catch(e) {
-      console.log('Error: ', e);
+      
 
       res.status(500).send({
         error: e,

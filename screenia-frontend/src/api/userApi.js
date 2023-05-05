@@ -16,7 +16,7 @@ const fetchUsersToApprove = () => {
 }
 
 const fetchPostApprovalUsers = (ids) => {
-    console.log('ids', ids)
+    
     return userApi.post(`/approval`, { idUsers: [...ids] });
 }
 

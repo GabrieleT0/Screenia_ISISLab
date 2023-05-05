@@ -29,7 +29,7 @@ export const getCommentsSelector = selector({
             
             return [...response.data];
         } catch(error) {
-            console.log('Errore:', error)
+            
             //throw error;
         }
     },

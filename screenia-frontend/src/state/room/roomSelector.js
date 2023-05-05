@@ -6,7 +6,7 @@ import { roomCommentsAtom } from "./roomAtom";
 export const getCommentsAndDiscussionsSelector = selector({
     key: `roomMessagesSelector`,
     get: async ({ get }) => {
-        console.log('ci sto in selector')
+        
         const roomComments = get(roomCommentsAtom);
         const idRoom = roomComments.idRoom;
         const filter = roomComments.filter;
@@ -39,7 +39,7 @@ export const getCommentsAndDiscussionsSelector = selector({
             
             return discussionMessages;
         } catch(error) {
-            console.log('Errore:', error)
+            
             throw error;
         }
     },

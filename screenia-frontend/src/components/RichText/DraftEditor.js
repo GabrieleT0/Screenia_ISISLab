@@ -158,7 +158,7 @@ export default function DraftEditor({
 
     /*const onSearchChange = useCallback(
         _.debounce(async ({ trigger, value }) => {
-            console.log('MAMMT', trigger)
+            
             if(trigger === "/out") {
                 const dataOutMention = await fetchOutMentions(idOpera, value);
                 setSuggestions(dataOutMention.map((item) => ({
@@ -241,7 +241,7 @@ export default function DraftEditor({
                 suggestions={suggestions}
                 onSearchChange={onSearchChange}
                 onAddMention={(item) => {
-                    console.log('mention ok', item)
+                    
                 }}
                 entryComponent={Entry}
                 popoverContainer={({ children }) => <div>{children}</div>}

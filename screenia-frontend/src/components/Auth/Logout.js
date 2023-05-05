@@ -23,7 +23,7 @@ const Logout = () => {
             setAuthToken(null);
             setUser(null);
         } catch(e) {
-            console.log('Error: ', e);
+            
         } finally {
             setLoader();
         }

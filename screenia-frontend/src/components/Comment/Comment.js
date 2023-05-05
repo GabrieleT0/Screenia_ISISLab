@@ -57,7 +57,7 @@ const Comment = ({ opera, comment, handleUpdateComment }) => {
         if(idRoom) {
             navigate(`/room/${idRoom}`);
         } else {
-            console.log('modale room')
+            
 
             setModal({
                 isOpen: true,
@@ -83,7 +83,7 @@ const Comment = ({ opera, comment, handleUpdateComment }) => {
                 filters: null
             })
         } catch(e) {
-            console.log('Error: ', e)
+            
         } finally {
             setLoader();
         }

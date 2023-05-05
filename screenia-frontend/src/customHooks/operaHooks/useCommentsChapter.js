@@ -25,7 +25,7 @@ const useCommentsChapter = () => {
 
             return setComments([...response.data]);
         } catch(e) {
-            console.log('ma che cazz', e)
+            
             toast.error("Impossibile recuperare i commenti. Contattare l'amministrazione!");
         }
     }

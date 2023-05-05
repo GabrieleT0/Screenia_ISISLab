@@ -1,39 +1,24 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { 
-    Paper,
-    List,
-    ListItem,
-    ListItemText,
-    Input,
+import {
     Button,
-    Typography,
-    useTheme,
-    ListItemAvatar,
-    Avatar,
-    Breadcrumbs,
-    Link,
-    ButtonGroup,
     Grid,
+    Paper,
     Stack,
+    ToggleButton,
     ToggleButtonGroup,
-    ToggleButton
+    useTheme
 } from "@mui/material";
-import { toast } from 'react-toastify';
-import { fetchCommentsByRoom, fetchDiscussionByRoom, fetchPostDiscussionByRoom } from '../api/opereApi';
-import { useParams } from 'react-router-dom';
 import { Box } from '@mui/system';
-import Message from '../components/Room/Message';
-import DraftEditor from "../components/RichText/DraftEditor";
-import moment from 'moment';
-import { Element, Events, animateScroll as scroll, scrollSpy, scroller } from 'react-scroll'
-import { getCommentsAndDiscussionsSelector } from '../state/room/roomSelector';
-import { useRecoilState, useRecoilValue } from 'recoil';
-import { roomCommentsAtom } from '../state/room/roomAtom';
-import uuid from 'react-uuid';
 import { EditorState } from 'draft-js';
-import confirmModalAtom from '../state/modal/confirmModalAtom';
-import { Contrast } from '@mui/icons-material';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { useRecoilState, useRecoilValue } from 'recoil';
+import { fetchPostDiscussionByRoom } from '../api/opereApi';
 import QuillRichText from '../components/QuillRichText/QuillRichText';
+import Message from '../components/Room/Message';
+import confirmModalAtom from '../state/modal/confirmModalAtom';
+import { roomCommentsAtom } from '../state/room/roomAtom';
+import { getCommentsAndDiscussionsSelector } from '../state/room/roomSelector';
 
 export default function DiscussionCommentPage() {
     const { idRoom } = useParams();
@@ -55,8 +40,6 @@ export default function DiscussionCommentPage() {
             filter: 'both'
         })
     }, [idRoom]);
-
-    useEffect(() => console.log('messages', messages), [messages]);
 
     const handleChangeToggleDiscussion = (event, newToggle) => {
         if(!newToggle) return;
@@ -90,7 +73,7 @@ export default function DiscussionCommentPage() {
                 filter: toggleDiscussion
             })
         } catch(e) {
-            console.log('Errore', e);
+            
             toast.error("Error in posting discussion. If the error persists, please contact the administration!");
         }
     })
@@ -117,8 +100,6 @@ export default function DiscussionCommentPage() {
 
         return true;
     }
-
-    useEffect(() => console.log('OK RESET', textEditor), [])
 
     const handleChangeContentEditor = useCallback((convertToRaw, plainText) => {
         setTextEditor({

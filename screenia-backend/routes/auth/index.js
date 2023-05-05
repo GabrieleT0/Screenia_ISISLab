@@ -67,7 +67,7 @@ router.post('/login', validateLogin ,async function (req, res, next) {
         
         return res.send(userData);
     } catch(e) {
-        console.log('Error', e)
+        
         return res.status(500).send(e.message);
     }
 });
@@ -160,7 +160,7 @@ router.post('/logout', async function (req, res, next) {
 
 router.get('/verify-account/:token', async function (req, res, next) {
     const token = req.params.token;
-    console.log('toke', token)
+    
 
     try {
         jwt.verify(token, VERIFY_EMAIL_SECRET, async (err, decodedToken)=>{

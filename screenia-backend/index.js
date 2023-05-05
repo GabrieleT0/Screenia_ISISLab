@@ -56,4 +56,4 @@ app.use('/auth', authRouter);
 app.use('/room', roomRouter);
 app.use('/discussion', discussionRouter);
 
-app.listen(3001, () => console.log("Server ready"));
+app.listen(3001);
