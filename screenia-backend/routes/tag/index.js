@@ -1,15 +1,12 @@
 const express = require('express');
-import { insertTag, searchTagsByTitle } from "../../controllers/tag";
-import initModels from "../../models/init-models";
-const { Op } = require("sequelize");
-import { database } from "../../utils/database/sequelizeDB";
-const router = express.Router();
+import { insertTag, searchTags } from "../../controllers/tag";
 import verifyToken from "../../middlware/verifyToken";
+const { Op } = require("sequelize");
+const router = express.Router();
 
 router.get(
   '/search',
-  (req, res, next) => verifyToken(req, res, next, ["user", "admin", "editor"]),
-  searchTagsByTitle
+  searchTags
 );
 
 router.post(

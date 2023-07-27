@@ -38,15 +38,7 @@ const findAllComment = async (conditions, username, tags) => {
                     model: user,
                     required: true,
                     attributes: ["id", "name", "surname"],
-                    where: {
-                        [Op.or]: [
-                            Sequelize.where(
-                                Sequelize.fn('concat', Sequelize.col('name'), ' ', Sequelize.col('surname')), {
-                                    [Op.like]: `%${username}%`,
-                                },
-                            )
-                        ],
-                    }
+                    where: username ? { email: username } : {}
                 },
                 {
                     model: comment_paragraph,
@@ -116,6 +108,8 @@ const createComment = async (body, user = null) => {
             }
         }
 
+        const fromToIsNull = parseInt(body.from.number) === parseInt(body.to.number);
+
         //Creazione del commento
         const comment = await comment_paragraph.create({
             text: body.text,
@@ -125,8 +119,8 @@ const createComment = async (body, user = null) => {
             number_paragraph: body.idParagraph,
             insert_date: new Date(),
             user_id: user.id,
-            from_paragraph: body.from,
-            to_paragraph: body.to,
+            from_paragraph: fromToIsNull ? null : body.from,
+            to_paragraph: fromToIsNull ? null : body.to,
             flat_text: body.flatText,
             parent_id: body.idParent || null,
             impact: body.impact || null

@@ -1,23 +1,15 @@
-import React, { useContext, useState, useEffect } from "react";
+import PriorityHighIcon from '@mui/icons-material/PriorityHigh';
 import {
   Avatar,
-  Button,
   Card,
-  Stack,
-  Typography,
-  ThemeProvider,
-  TextField,
+  Chip,
   Grid,
-  Chip
+  Stack,
+  Typography
 } from "@mui/material";
 import { Box } from "@mui/system";
-import { Delete, Edit } from "@mui/icons-material";
-import DraftEditor from "../RichText/DraftEditor";
-import { EditorState } from 'draft-js';
-import { convertFromRaw } from 'draft-js';
 import moment from "moment";
-import PriorityHighIcon from '@mui/icons-material/PriorityHigh';
-import uuid from "react-uuid";
+import React from "react";
 import { getHtmlComment } from "../../utils/quillRichTextUtils";
 
 const MessageDiscussion = ({ message }) => {
@@ -90,10 +82,9 @@ const MessageComment = ({ message }) => {
         </Stack>
       </Grid>
       <Grid item>
-        {message.from_paragraph && message.to_paragraph 
-          && parseInt(message.from_paragraph) !== parseInt(message.to_paragraph) && (
+        {message.from_paragraph && message.to_paragraph && (
             <Typography variant="caption" style={{ color: "#00000094" }}>
-                Comment from paragraph <strong>{message.from_paragraph}</strong> to <strong>{message.to_paragraph}</strong>
+                Comment from paragraph with label <strong>{message.from_paragraph.label}</strong> to <strong>{message.label}</strong>
             </Typography>
         )}
       </Grid>

@@ -1,19 +1,11 @@
-import { 
-    Paper,
-    Grid,
+import {
     List,
     ListItem,
-    Avatar,
     ListSubheader,
-    Chip,
+    Paper,
     Typography
 } from "@mui/material";
-import moment from "moment";
-import { Element, animateScroll as scroll, scroller } from 'react-scroll';
-import CommentParagraph from "./CommentParagraph";
-import { EditorState } from 'draft-js';
-import { convertFromRaw } from 'draft-js';
-import DraftEditor from '../RichText/DraftEditor';
+import { Element } from 'react-scroll';
 import Comment from "./Comment";
 
 /*const getJsonRichTextReferenceToMultipleComment = (mention = null) => {  
@@ -87,8 +79,8 @@ const generateCommentReferences = (comments = []) => {
 
     //Create reference comment for view
     for(const comment of comments) {
-        if(comment.from_paragraph !== comment.to_paragraph) {
-          for(let i=0; i < comment.to_paragraph - 1; i++) {
+        if(comment.from_paragraph && comment.to_paragraph) {
+          for(let i=0; i < parseInt(comment.to_paragraph.number) - 1; i++) {
             const jsonMultipleComment = getJsonRichTextReferenceToMultipleComment({ 
               id: `${comment.id_opera}, ${comment.number_book}, ${comment.number_chapter}, ${comment.number_paragraph}`,
               name: `${comment.user.name} ${comment.user.surname}, paragraph ${comment.label ? comment.label : comment.number_paragraph}`,
@@ -101,8 +93,8 @@ const generateCommentReferences = (comments = []) => {
               number_chapter: comment.number_chapter,
               number_paragraph: comment.number_paragraph,
               text: JSON.stringify(jsonMultipleComment),
-              from_paragraph: 0,
-              to_paragraph: 0,
+              from_paragraph: null,
+              to_paragraph: null,
               number_paragraph: i+1,
               reference_to_comment: comment.id,
               insert_date: comment.insert_date,

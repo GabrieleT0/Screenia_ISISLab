@@ -51,7 +51,6 @@ const Comment = ({ opera, comment, handleUpdateComment }) => {
         if(idRoom) {
             navigate(`/room/${idRoom}`);
         } else {
-            
 
             setModal({
                 isOpen: true,
@@ -131,9 +130,9 @@ const Comment = ({ opera, comment, handleUpdateComment }) => {
                                     </p>
                             </Grid>)}
                         <Grid item>
-                            {from !== to && (
+                            {from && to && (
                                 <Typography variant="caption" style={{ color: "#00000094" }}>
-                                    Comment from paragraph <strong>{from}</strong> to <strong>{to}</strong>
+                                    Comment from paragraph with label <strong>{from.label}</strong> to <strong>{to.label}</strong>
                                 </Typography>
                             )}
                         </Grid>

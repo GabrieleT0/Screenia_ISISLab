@@ -1,11 +1,7 @@
 const express = require('express');
-import { Op, Sequelize } from "sequelize";
 import verifyToken from "../../middlware/verifyToken";
-import { comment_paragraph, comment_paragraph_review, tag, user } from "../../models";
 import CommentParagraphService from "../../services/comment_paragraph";
 import RoomService from "../../services/room";
-import { config } from "../../utils/database/config";
-import { database } from "../../utils/database/sequelizeDB";
 const router = express.Router();
 
 router.post('/', 

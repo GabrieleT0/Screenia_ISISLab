@@ -1,34 +1,32 @@
-import InfoIcon from '@mui/icons-material/Info';
 import {
     Autocomplete,
-    TextField,
-    Tooltip
+    TextField
 } from '@mui/material';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
-import { fetchTags } from '../../api/opereApi';
+import { fetchUsersEditors } from '../../api/userApi';
 
-const TagAutocomplete = ({ value = [], handleSelect = null, readOnly = false }) => {
+const EditorAutocomplete = ({ value = null, handleSelect = null, readOnly = false }) => {
     const [isLoading, setIsLoading] = useState(true);
-    const [tagsOptions, setTagsOptions] = useState([]);
+    const [editorOptions, setEditorOptions] = useState([]);
 
     useEffect(() => { 
-        getTags();
+        getUsersEditors();
     }, []);
 
-    const getTags = async () => {
+    const getUsersEditors = async () => {
 
         try {
             setIsLoading(true);
-            const response = await fetchTags();
+            const response = await fetchUsersEditors();
             let options = [];
 
             if(response.data && response.data.length > 0) {
                 options = [...response.data]
             }
 
-            setTagsOptions(options);
+            setEditorOptions(options);
         } catch(e) {
             toast.error("Impossibile recuperare i Tag. Contattare l'amministrazione!")
         } finally {
@@ -44,12 +42,23 @@ const TagAutocomplete = ({ value = [], handleSelect = null, readOnly = false }) 
 
     return (
         <Autocomplete
-            multiple
-            id="tags-comment"
+            multiple={false}
             value={value}
-            noOptionsText="There is no tag present!"
-            options={tagsOptions.sort((a, b) => -b.category.localeCompare(a.category))}
-            getOptionLabel={(option) => option.title}
+            id="editors-comment"
+            noOptionsText="There is no editor present!"
+            options={editorOptions.sort()}
+            getOptionLabel={(option) => {
+                const editorFilter = editorOptions.filter(
+                    ({ name, surname }) => 
+                        name.toLowerCase() === option.name.toLowerCase() &&
+                        surname.toLowerCase() === option.surname.toLowerCase());
+
+                if(editorFilter.length > 1) {
+                    return `${option.name} ${option.surname} - ${option.email}`;
+                }
+
+                return `${option.name} ${option.surname}`;
+            }}
             onChange={onChangeTag}
             style={{ maxWidth: 583 }}
             getOptionDisabled={(option) => {
@@ -59,12 +68,11 @@ const TagAutocomplete = ({ value = [], handleSelect = null, readOnly = false }) 
             }}
             disabled={readOnly}
             filterSelectedOptions
-            isOptionEqualToValue={(option, value) => option.title === value.title}
-            groupBy={(option) => option.category}
+            isOptionEqualToValue={(option, value) => option.id === value.id}
             renderInput={(params) => (
                 <TextField
                     {...params}
-                    label="Tags"
+                    label="Editor"
                     InputProps={{
                         ...params.InputProps,
                         endAdornment: (
@@ -75,18 +83,8 @@ const TagAutocomplete = ({ value = [], handleSelect = null, readOnly = false }) 
                         ),
                     }} />
             )}
-            renderOption={(props, option, { selected }) => {
-                return (
-                    <li {...props}>
-                        <Tooltip title={`${option.description ? option.description : ""}`}>
-                            <InfoIcon style={{ marginRight: 5 }} color="secondary" />
-                        </Tooltip>
-                        {option.title}
-                    </li>
-                )
-            }}
         />
     )
 }
 
-export default TagAutocomplete;
+export default EditorAutocomplete;

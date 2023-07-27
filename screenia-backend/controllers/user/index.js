@@ -11,6 +11,17 @@ const getAllUsersToApprove = async (req, res) => {
     }
 }
 
+const getAllUserEditor = async (req, res) => {
+    try {
+        const editors = await UserService.getUserEditor();
+        const editorsFilter = editors.map(({ name, surname, id, email }) => ({ name, surname, id, email }));
+
+        return res.status(200).send(editorsFilter);
+    } catch(e) {
+        return res.status(500).send({ message: e.message });
+    }
+}
+
 const approveUsers = async (req, res) => {
     const idUsers = req.body.idUsers;
 
@@ -43,5 +54,6 @@ const approveUsers = async (req, res) => {
 
 export {
     getAllUsersToApprove,
+    getAllUserEditor,
     approveUsers
-}
+};

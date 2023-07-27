@@ -21,13 +21,11 @@ module.exports = function(sequelize, DataTypes) {
     },
     from_paragraph: {
       allowNull: true,
-      type: DataTypes.STRING(255),
-      defaultValue: 0
+      type: DataTypes.JSON
     },
     to_paragraph: {
       allowNull: true,
-      type: DataTypes.STRING(255),
-      defaultValue: 0
+      type: DataTypes.JSON
     },
     tag_update: {
         allowNull: false,

@@ -60,14 +60,8 @@ const CommentParagraph = ({
     useEffect(() => {
         if(!commentUpdate || !commentUpdate.idComment) return;
 
-        const commentFrom = { number: commentUpdate.from, label: commentUpdate.from };
-        const commentTo = { number: commentUpdate.to, label: commentUpdate.to };
-
-        handleSetRange(commentFrom, "from")
-        handleSetRange(commentTo, "to")
-        /*setEditor(() => EditorState.createWithContent(
-            convertFromRaw(JSON.parse(commentUpdate.text))
-        ));*/
+        handleSetRange(commentUpdate.from, "from")
+        handleSetRange(commentUpdate.to, "to")
         setTextEditor({
             plainText: commentUpdate.flat_text,
             convertToRaw: JSON.parse(commentUpdate.text)
@@ -108,8 +102,8 @@ const CommentParagraph = ({
             idChapter: opera.idChapter,
             idParagraph: toRange.number,
             tags: tagSelected.map(({ title }) => title),
-            from: fromRange.label,
-            to: toRange.label,
+            from: fromRange,
+            to: toRange,
             flatText: textEditor.plainText,
             idParent: idParent,
             impact: typeUpdate

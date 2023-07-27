@@ -9,8 +9,7 @@ import {
     MenuItem,
     Paper,
     Select,
-    Switch,
-    TextField
+    Switch
 } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
@@ -24,6 +23,7 @@ import CommentContainer from "../components/Comment/CommentContainer";
 import CommentParagraph from "../components/Comment/CommentParagraph";
 import FullScreenDialog from "../components/Dialog/FullScreenDialog";
 import EditionDetails from "../components/Edition/EditionDetails";
+import EditorAutocomplete from "../components/Editor/EditorAutocomplete";
 import ChapterTabs from "../components/Opera/ChapterTabs";
 import TagAutocomplete from "../components/Tag/TagAutocomplete";
 import useComponentByUserRole from "../customHooks/authHooks/useComponentByRole";
@@ -77,21 +77,21 @@ const SelectBook = ({ books = [], value = 1, handleSelect }) => {
 
 const FilteredComment = ({ handleSave }) => {
     const [tagSelected, setTagSelected] = useState([]);
-    const [username, setUsername] = useState("");
+    const [editor, setEditor] = useState(null);
 
     const handleSelectTags = useCallback((items) => {
         setTagSelected(items);
     });
 
-    const handleChangeUsername = useCallback((event) => {
-        setUsername(event.target.value)
-    });
-
     const onSearch = () => {
         const tagsTitlte = tagSelected.map(( { title }) => title)
-        handleSave(username, tagsTitlte);
+        handleSave(editor && editor.email ? editor.email : null, tagsTitlte);
         setTagSelected([]);
-        setUsername("");
+        setEditor(null);
+    }
+
+    const handleSelectEditor = (value) => {
+        setEditor(value);
     }
 
     return (
@@ -105,13 +105,8 @@ const FilteredComment = ({ handleSave }) => {
                         value={tagSelected} 
                         handleSelect={handleSelectTags} />
                 </Grid>
-                <Grid item xs={12} md={2}>
-                    <TextField 
-                        id="filter_comment_user" 
-                        label="Commentator" 
-                        variant="outlined" 
-                        value={username} 
-                        onChange={handleChangeUsername} />
+                <Grid item xs={12} md={4}>
+                    <EditorAutocomplete value={editor} handleSelect={handleSelectEditor} />
                 </Grid>
                 <Grid item xs={2} style={{ display: 'flex', justifyContent: 'flex-start', }}>
                     <Button

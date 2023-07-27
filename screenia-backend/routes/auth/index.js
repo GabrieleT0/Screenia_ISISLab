@@ -3,7 +3,7 @@ require('dotenv').config();
 const express = require('express');
 import validateLogin from "../../middlware/validateLogin";
 import validateRegister from "../../middlware/validateRegister";
-import { user as userModel, role as roleModel } from "../../models";
+import { role as roleModel, user as userModel } from "../../models";
 import MailService from "../../services/mail";
 const router = express.Router();
 const bcrypt = require("bcryptjs");
@@ -12,6 +12,7 @@ const jwt = require('jsonwebtoken');
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET;
 const ACCESS_TOKEN_LIFE = process.env.ACCESS_TOKEN_LIFE;
 const VERIFY_EMAIL_SECRET = process.env.VERIFY_ACCOUNT_TOKEN_SECRET;
+const RESET_PASSWORD_TOKE_SECRET = process.env.VERIFY_ACCOUNT_TOKEN_SECRET;
 
 router.post('/login', validateLogin ,async function (req, res, next) {
     const { ...body } = req.body;

@@ -1,4 +1,6 @@
+const { Op } = require("sequelize");
 import { user as userModel } from "../../models";
+import RoleService from "../role";
 
 const getUserToApprove = async (idUser) => {
     if(idUser) throw new Error("User is required!");
@@ -45,10 +47,30 @@ const getUserByPk = async (id) => {
     }
 }
 
+const getUserEditor = async () => {
+    try {
+        const roleEditor = await RoleService.getRoleByName("editor");
+        const roleAdmin = await RoleService.getRoleByName("admin");
+        const user = await userModel.findAll({
+            where: {
+                [Op.or]: [
+                    { role_id: roleEditor.id },
+                    { role_id: roleAdmin.id }
+                ]
+            }
+        });
+
+        return user;
+    } catch(e) {
+        throw new Error(e);
+    }
+}
+
 const UserService = {
     getUserToApprove,
     approvalUsers,
-    getUserByPk
+    getUserByPk,
+    getUserEditor
 }
 
 export default UserService;

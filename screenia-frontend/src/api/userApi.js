@@ -20,7 +20,12 @@ const fetchPostApprovalUsers = (ids) => {
     return userApi.post(`/approval`, { idUsers: [...ids] });
 }
 
+const fetchUsersEditors = () => {
+    return userApi.get(`/usersEditors`);
+}
+
 export {
     fetchUsersToApprove,
-    fetchPostApprovalUsers
-}
+    fetchPostApprovalUsers,
+    fetchUsersEditors
+};

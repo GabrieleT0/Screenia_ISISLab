@@ -61,11 +61,11 @@ module.exports = function(sequelize, DataTypes) {
     },
     from_paragraph: {
       allowNull: true,
-      type: DataTypes.INTEGER,
+      type: DataTypes.JSON
     },
     to_paragraph: {
       allowNull: true,
-      type: DataTypes.INTEGER,
+      type: DataTypes.JSON
     },
     parent_id: {
       type: DataTypes.INTEGER,

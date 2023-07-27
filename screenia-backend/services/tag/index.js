@@ -1,14 +1,8 @@
-import { Op } from "sequelize";
 import { tag as tagModel } from "../../models";
 
-const getTagsByTitle = async (value = "") => {
+const getTags = async () => {
     try {
         const tags = await tagModel.findAll({
-            where: {
-                title: {
-                    [Op.like]: `%${value.trim()}%`
-                }
-            },
             order: [['title', 'DESC']],
             limit: 20
         });
@@ -42,7 +36,7 @@ const createTag = async (body = null) => {
 }
 
 const TagService = {
-    getTagsByTitle,
+    getTags,
     createTag
 }
 

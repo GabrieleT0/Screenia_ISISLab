@@ -1,12 +1,12 @@
 import { Op, Sequelize } from "sequelize";
 import {
-    opera_primary_literature,
     author_primary_literature,
     book,
     chapter,
+    comment_paragraph,
+    opera_primary_literature,
     paragraph,
-    user as userModel,
-    comment_paragraph
+    user as userModel
 } from "../../models";
 
 const getRichTextOutOpera = async (idOpera, value = "") => {
@@ -310,6 +310,9 @@ const getRichTextCommentOpera = async (idOpera, value = "") => {
     try {
         const User = userModel;
         const Comment = comment_paragraph;
+        const Book = book;
+        const Chapter = chapter;
+        const Paragraph = paragraph;
         const userQuery = await User.findOne({
             attributes: ["id", "name", "surname"],
             where: {
@@ -329,19 +332,7 @@ const getRichTextCommentOpera = async (idOpera, value = "") => {
                 model: Comment,
                 attributes: ['id', 'id_opera', 'number_book', 'number_chapter', 'number_paragraph'],
                 where: {
-                    id_opera: idOpera,
-                    number_book: {
-                        [Op.like]: searchSplit[1] && parseInt(searchSplit[1]) 
-                            ? `%${parseInt(searchSplit[1])}%` : `%%`
-                    },
-                    number_chapter: {
-                        [Op.like]: searchSplit[2] && parseInt(searchSplit[2]) 
-                            ? `%${parseInt(searchSplit[2])}%` : `%%`
-                    },
-                    number_paragraph: {
-                        [Op.like]: searchSplit[3] && parseInt(searchSplit[3]) 
-                            ? `%${parseInt(searchSplit[3])}%` : `%%`
-                    }
+                    id_opera: idOpera
                 }
             }
         });
@@ -354,14 +345,92 @@ const getRichTextCommentOpera = async (idOpera, value = "") => {
         const user = userQuery.toJSON();
 
         for(const comment of user.comment_paragraphs) {
-            const id = `${user.id}, ${comment.id_opera}, ${comment.number_book}, ${comment.number_chapter}, ${comment.number_paragraph}`;
-            const name = `Editor ${user.name} ${user.surname}, reference paragraph comment number ${comment.number_paragraph}`;
+            const bookQuery = await Book.findAll({
+                attributes: ['number', 'title'],
+                where: {
+                    number: comment.number_book,
+                    id_opera: comment.id_opera,
+                    [Op.or]: [
+                        { 
+                            number: {
+                                [Op.like]: searchSplit[1] ? `%${searchSplit[1].trim()}%` : `%%`
+                            } 
+                        },
+                        { 
+                            title: {
+                                [Op.like]: searchSplit[1] ? `%${searchSplit[1].trim()}%` : `%%`
+                            } 
+                        }
+                    ]
+                },
+                order: [
+                    ["number", "ASC"],
+                ],
+                limit: 5, //Return the first 5 results for performance reasons
+                include: [
+                    {
+                        model: Chapter,
+                        as: "chapters",
+                        attributes: ['number', 'title'],
+                        where: {
+                            number: comment.number_chapter,
+                            number_book: comment.number_book,
+                            id_opera: comment.id_opera,
+                            [Op.or]: [
+                                { 
+                                    number: {
+                                        [Op.like]: searchSplit[2] ? `%${searchSplit[2].trim()}%` : `%%`
+                                    } 
+                                },
+                                { 
+                                    title: {
+                                        [Op.like]: searchSplit[2] ? `%${searchSplit[2].trim()}%` : `%%`
+                                    } 
+                                }
+                            ]
+                        },
+                        order: [
+                            ["number", "ASC"],
+                        ],
+                        limit: 5, //Return the first 5 results for performance reasons
+                        include: [
+                            {
+                                model: Paragraph,
+                                as: "paragraphs",
+                                attributes: ['number', 'label'],
+                                where: {
+                                    number: comment.number_paragraph,
+                                    number_chapter: comment.number_chapter,
+                                    number_book: comment.number_book,
+                                    id_opera: comment.id_opera,
+                                    label: {
+                                        [Op.like]: searchSplit[3] ? `%${searchSplit[3].trim()}%` : `%%`
+                                    }
+                                },
+                                order: [
+                                    ["number", "ASC"],
+                                ],
+                                limit: 5, //Return the first 5 results for performance reasons
+                            }
+                        ]
+                    }
+                ]
+            });
 
-            if(!result.some((item) => item.id === id)) {
-                result.push({
-                    id: id,
-                    name: name
-                })
+            for(const bookData of bookQuery) {
+                for(const chapterData of bookData.chapters) {
+                    for(const paragraphData of chapterData.paragraphs) {
+                        const id = `${user.id}, ${comment.id_opera}, ${comment.number_book}, ${comment.number_chapter}, ${comment.number_paragraph}`;
+                        const name = `Editor ${user.name} ${user.surname}, comment on book ${bookData.number}, chapter ${chapterData.number} and paragraph ${paragraphData.label}`;
+                        const link = `${comment.id_opera}/${comment.number_book}/${comment.number_chapter}/${comment.number_paragraph}/${comment.id}`;
+
+                        result.push({
+                            id: id,
+                            name: name,
+                            link: link
+                        })
+                    }
+                }
             }
         }
 

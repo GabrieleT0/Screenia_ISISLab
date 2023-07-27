@@ -1,10 +1,8 @@
 import TagService from "../../services/tag";
 
-const searchTagsByTitle = async (req, res) => {
-    const { value = "" } = req.query;
-
+const searchTags = async (req, res) => {
     try {
-        const resultQuery = await TagService.getTagsByTitle(value);
+        const resultQuery = await TagService.getTags();
 
         return res.send(resultQuery || []);
     } catch(e) {
@@ -37,6 +35,6 @@ const insertTag = async (req, res) => {
 }
 
 export {
-    searchTagsByTitle,
-    insertTag
-}
+  searchTags,
+  insertTag
+};
