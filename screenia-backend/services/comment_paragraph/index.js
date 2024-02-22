@@ -2,6 +2,7 @@ import { Op, Sequelize } from "sequelize";
 import { comment_paragraph, db, room, tag, user } from "../../models";
 import RoomService from "../room";
 
+
 const findByIdComment = async (id) => {
     try {
         const data = await comment_paragraph.findByPk(id, {
@@ -10,7 +11,7 @@ const findByIdComment = async (id) => {
         });
 
         return data;
-    } catch(error) {
+    } catch (error) {
         throw new Error(error.message)
     }
 }
@@ -30,8 +31,8 @@ const findAllComment = async (conditions, username, tags) => {
                 parent_id: null
             },
             include: [
-                { 
-                    model: tag, 
+                {
+                    model: tag,
                     required: false,
                 },
                 {
@@ -46,17 +47,17 @@ const findAllComment = async (conditions, username, tags) => {
                     required: false,
                     where: {
                         insert_date: {
-                        [Op.eq]: Sequelize.literal(`(SELECT MAX(insert_date) FROM comment_paragraph AS revisions WHERE revisions.parent_id = comment_paragraph.id)`)
-                      }
+                            [Op.eq]: Sequelize.literal(`(SELECT MAX(insert_date) FROM comment_paragraph AS revisions WHERE revisions.parent_id = comment_paragraph.id)`)
+                        }
                     },
                     include: [
-                        { 
+                        {
                             model: tag
                         }
                     ]
                 },
-                { 
-                    model: room, 
+                {
+                    model: room,
                     required: false,
                 }
             ]
@@ -67,7 +68,7 @@ const findAllComment = async (conditions, username, tags) => {
             //Ottengo il commento come JSON senza wrapper Sequelize
             const commentJson = comment.get({ plain: true });
 
-            if(commentJson.revisions[0]) {
+            if (commentJson.revisions[0]) {
                 let newComment = {
                     ...commentJson,
                     ...commentJson.revisions[0]
@@ -83,13 +84,86 @@ const findAllComment = async (conditions, username, tags) => {
         //Filtro i commenti per tag
         const result = newComments.filter(comment => {
             return tags.every(tagTitle => {
-              return comment.tags.some(tag => tag.title === tagTitle);
+                return comment.tags.some(tag => tag.title === tagTitle);
             });
         });
 
         return result;
-    } catch(error) {
-        
+    } catch (error) {
+
+        throw new Error(error.message)
+    }
+}
+
+const findCommentWithPar = async (conditions, books, chapters, usernames, tags) => {
+    try {
+        const comments = await comment_paragraph.findAll({
+            where: {
+                id_opera: conditions.idOpera,
+                number_book: Array.isArray(books) ? { [Op.in]: books } : books,
+                number_chapter: Array.isArray(chapters) ? { [Op.in]: chapters } : chapters,
+                parent_id: null
+            },
+            include: [
+                {
+                    model: tag,
+                    required: false,
+                },
+                {
+                    model: user,
+                    required: true,
+                    attributes: ["id", "name", "surname"],
+                    where: usernames ? { email: { [Op.in]: usernames } } : {}
+                },
+                {
+                    model: comment_paragraph,
+                    as: 'revisions',
+                    required: false,
+                    where: {
+                        insert_date: {
+                            [Op.eq]: Sequelize.literal(`(SELECT MAX(insert_date) FROM comment_paragraph AS revisions WHERE revisions.parent_id = comment_paragraph.id)`)
+                        }
+                    },
+                    include: [
+                        {
+                            model: tag
+                        }
+                    ]
+                },
+                {
+                    model: room,
+                    required: false,
+                }
+            ]
+        });
+
+        //Aggiorno i dati del commento con i dati dell'ultima revisione
+        const newComments = comments.map(comment => {
+            //Ottengo il commento come JSON senza wrapper Sequelize
+            const commentJson = comment.get({ plain: true });
+
+            if (commentJson.revisions[0]) {
+                let newComment = {
+                    ...commentJson,
+                    ...commentJson.revisions[0]
+                }
+                delete newComment.revisions;
+
+                return newComment;
+            }
+
+            return commentJson;
+        });
+
+        //Filtro i commenti per tag
+        const result = newComments.filter(comment => {
+            return tags.every(tagTitle => {
+                return comment.tags.some(tag => tag.title === tagTitle);
+            });
+        });
+
+        return result;
+    } catch (error) {
         throw new Error(error.message)
     }
 }
@@ -98,11 +172,11 @@ const createComment = async (body, user = null) => {
     const transaction = await db.sequelize.transaction();
 
     try {
-        if(body.idParent) {
+        if (body.idParent) {
             //Se non è stata creata la stanza, alla prima modifica di un commento viene creata
             const isExistRoom = await RoomService.existingRoomByIdComment(body.idParent);
-            
-            if(!isExistRoom) {
+
+            if (!isExistRoom) {
                 await RoomService.createRoom(
                     { comment_paragraph_id: body.idParent }, user);
             }
@@ -130,11 +204,11 @@ const createComment = async (body, user = null) => {
         const tagsDB = [];
 
         // Associazione dei tag al commento
-        if(tags.length > 0) {
-            for(const tagItem of tags) {
+        if (tags.length > 0) {
+            for (const tagItem of tags) {
                 const tagDB = await tag.findByPk(`${tagItem}`);
 
-                if(!tagDB) {
+                if (!tagDB) {
                     await transaction.rollback();
                     throw new Error(`Tag ${tagItem} not found!`);
                 }
@@ -147,7 +221,7 @@ const createComment = async (body, user = null) => {
         await transaction.commit();
 
         return comment;
-    } catch(error) {
+    } catch (error) {
         await transaction.rollback();
         throw new Error(error.message)
     }
@@ -164,7 +238,7 @@ const getCommentsRevisionById = async (idComment) => {
                     model: comment_paragraph,
                     as: 'revisions',
                     include: [
-                        { 
+                        {
                             model: tag
                         },
                         {
@@ -184,8 +258,8 @@ const getCommentsRevisionById = async (idComment) => {
         })
 
         return comment.get({ plain: true });
-    } catch(error) {
-        
+    } catch (error) {
+
         throw new Error(error.message)
     }
 }
@@ -194,7 +268,8 @@ const CommentParagraphService = {
     findByIdComment,
     findAllComment,
     createComment,
-    getCommentsRevisionById
+    getCommentsRevisionById,
+    findCommentWithPar
 }
 
 export default CommentParagraphService;

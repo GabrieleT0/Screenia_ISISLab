@@ -6,4 +6,5 @@ screenia-backend/.env
 screenia-frontend/.env
 screenia-frontend/build/
 screenia-backend/logs
-.env
+script.sql
+.*
