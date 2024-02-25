@@ -16,7 +16,7 @@ import { useParams } from "react-router-dom";
 import { animateScroll } from 'react-scroll';
 import { toast } from 'react-toastify';
 import { useRecoilCallback, useRecoilState, useRecoilValue } from "recoil";
-import { fetchBooksByOpera, fetchOpera } from "../api/opereApi";
+import { fetchBooksByOpera, fetchOpera, fetchOperaInfo } from "../api/opereApi";
 import AuthorDetails from "../components/Author/AuthorDetails";
 import BasicMenu from "../components/BasicMenu/BasicMenu";
 import CommentContainer from "../components/Comment/CommentContainer";
@@ -24,6 +24,7 @@ import CommentParagraph from "../components/Comment/CommentParagraph";
 import FullScreenDialog from "../components/Dialog/FullScreenDialog";
 import EditionDetails from "../components/Edition/EditionDetails";
 import EditorAutocomplete from "../components/Editor/EditorAutocomplete";
+import ExportModal from "../components/Modal/Modal";
 import ChapterTabs from "../components/Opera/ChapterTabs";
 import TagAutocomplete from "../components/Tag/TagAutocomplete";
 import useComponentByUserRole from "../customHooks/authHooks/useComponentByRole";
@@ -66,7 +67,7 @@ const SelectBook = ({ books = [], value = 1, handleSelect }) => {
                 }}
             >
                 {books.map(({ number, title }) => {
-                    
+
                     const label = title ? `Book #${number} - ${title}` : `Book #${number}`
                     return (<MenuItem value={number}>{label}</MenuItem>)
                 })}
@@ -84,7 +85,7 @@ const FilteredComment = ({ handleSave }) => {
     });
 
     const onSearch = () => {
-        const tagsTitlte = tagSelected.map(( { title }) => title)
+        const tagsTitlte = tagSelected.map(({ title }) => title)
         handleSave(editor && editor.email ? editor.email : null, tagsTitlte);
         setTagSelected([]);
         setEditor(null);
@@ -101,8 +102,8 @@ const FilteredComment = ({ handleSave }) => {
                 direction="row"
                 spacing={2} >
                 <Grid item xs={12} md={4}>
-                    <TagAutocomplete 
-                        value={tagSelected} 
+                    <TagAutocomplete
+                        value={tagSelected}
                         handleSelect={handleSelectTags} />
                 </Grid>
                 <Grid item xs={12} md={4}>
@@ -137,17 +138,8 @@ const OperaDetailsPage = () => {
     const [isSyncTextComment, setIsSyncTextComment] = useRecoilState(syncTextCommentOpera);
     const [commentUpdate, setCommentUpdate] = useState(null);
     const [showFiltersComment, setShowFiltersComment] = useState(false);
-
-    const itemsMenu = [
-        { 
-            title: `Download text Chapter #${chapterId}`, 
-            action: () => downloadParagraphTxtFile(chapterId, paragraphs)
-        },
-        { 
-            title: !showFiltersComment ? `View filters comments` : `Hide filters comments`, 
-            action: () => setShowFiltersComment((prev) => !prev)
-        }
-    ];
+    const [modalShow, setModalShow] = useState(false);
+    const [operaInfo, setOperaInfo] = useState(null);
 
     //Global State and Call API
     const [authToken, setAuthToken] = useRecoilState(authTokenAtom);
@@ -162,42 +154,62 @@ const OperaDetailsPage = () => {
     const [paragraphFilter, setParagraphFilter] = useRecoilState(paragraphAtom);
 
     const isUserAccessAddComment = useComponentByUserRole(
-        authToken, 
-        ["admin", "editor"], 
+        authToken,
+        ["admin", "editor"],
         user?.role || null);
 
+    const isUserAdminDown = useComponentByUserRole(
+        authToken,
+        ["admin"],
+        user?.role || null);
+
+    let itemsMenu = []
+
+    itemsMenu.push({
+        title: !showFiltersComment ? `View filters comments` : `Hide filters comments`,
+        action: () => setShowFiltersComment((prev) => !prev)
+    })
+
+    if (isUserAdminDown) {
+        itemsMenu.push({
+            title: `Export comments`,
+            action: () => downloadParagraphTxtFile(),
+        })
+    }
 
     const fetchOperaDetails = useRecoilCallback(({ set }) => async (id) => {
         try {
             setLoader();
             const responseOpera = await fetchOpera(id);
             const responseBooks = await fetchBooksByOpera(id);
+            const responseOperaInfo = await fetchOperaInfo(id);
+            setOperaInfo(responseOperaInfo.data)
             //const responseAuthors = await fetchAllAuthorByOpera(id);
             //const responseEditions = await fetchAllEditionByOpera(id);
 
-            const operaDetailsResponse = { 
+            const operaDetailsResponse = {
                 ...responseOpera.data,
                 books: [...responseBooks.data],
                 //editions: [...responseAuthors.data],
                 //authors: [...responseEditions.data]
             }
-    
+
             set(operaDetailsAtom, operaDetailsResponse);
 
             return operaDetailsResponse;
-        } catch(e) {
+        } catch (e) {
             return toast.error("Unable to upload the work. Please contact the administration!");
         } finally {
             setLoader();
         }
     });
-    
+
     useEffect(() => {
         initialLoad();
     }, [id, paramIdBook, paramIdChapter, paramIdParagraph]);
 
     useEffect(() => {
-        
+
     }, [paragraphs]);
 
     useEffect(() => {
@@ -211,7 +223,7 @@ const OperaDetailsPage = () => {
             idOpera: id,
             idBook: bookId,
             idChapter: chapterId,
-            filter: null 
+            filter: null
         })
     }, [chapterId, bookId])
 
@@ -219,17 +231,17 @@ const OperaDetailsPage = () => {
         const operaDetails = await fetchOperaDetails(id);
         const booksOperaDetails = operaDetails.books;
         let findBookWithParam = null;
-        if(Array.isArray(booksOperaDetails) && booksOperaDetails && booksOperaDetails[0]) {
+        if (Array.isArray(booksOperaDetails) && booksOperaDetails && booksOperaDetails[0]) {
 
-            if(paramIdBook) {
+            if (paramIdBook) {
                 findBookWithParam = booksOperaDetails.find((book) => parseInt(book.number) === parseInt(paramIdBook))
             }
             setBookId(findBookWithParam ? paramIdBook : booksOperaDetails[0].number);
 
-            if(Array.isArray(booksOperaDetails[0].chapters) && booksOperaDetails[0]?.chapters[0]?.number) {
+            if (Array.isArray(booksOperaDetails[0].chapters) && booksOperaDetails[0]?.chapters[0]?.number) {
                 let findChapterWithParam = null;
 
-                if(paramIdChapter && findBookWithParam) {
+                if (paramIdChapter && findBookWithParam) {
                     findChapterWithParam = findBookWithParam.chapters.find((chapter) => parseInt(chapter.number) === parseInt(paramIdChapter))
                 }
                 setChapterId(findChapterWithParam ? paramIdChapter : booksOperaDetails[0]?.chapters[0]?.number);
@@ -246,18 +258,8 @@ const OperaDetailsPage = () => {
         setChapterId(value);
     })
 
-    const downloadParagraphTxtFile = (chapterId, paragraphs = []) => {
-        if(!chapterId || !paragraphs || paragraphs.length === 0) {
-            return;
-        }
-
-        const element = document.createElement("a");
-        const textParagraph = paragraphs.map(({ text }) => (text));
-        const file = new Blob([textParagraph.join(`\n\n`)], {type: 'text/plain'});
-        element.href = URL.createObjectURL(file);
-        element.download = `${chapterId}.txt`;
-        document.body.appendChild(element); // Required for this to work in FireFox
-        element.click();
+    const downloadParagraphTxtFile = () => {
+        setModalShow(true)
     }
 
     const handleCommentParagraph = (id) => {
@@ -272,14 +274,14 @@ const OperaDetailsPage = () => {
             filters: {
                 user: username,
                 tags: [...tags]
-            } 
+            }
         })
     }
 
     const handleUpdateComment = (commentOnPassed) => {
-        if(!commentOnPassed) return;
+        if (!commentOnPassed) return;
 
-        
+
 
         setCommentUpdate({ ...commentOnPassed });
     }
@@ -287,100 +289,103 @@ const OperaDetailsPage = () => {
     const handleSyncComment = (event) => {
         const checked = event.target.checked;
         setIsSyncTextComment(event.target.checked);
-        if(checked) {
-            animateScroll.scrollToTop({containerId: "container_paragraph"});
+        if (checked) {
+            animateScroll.scrollToTop({ containerId: "container_paragraph" });
         }
     }
 
     return (
-        <Grid
-            container
-            direction="row"
-            spacing={2} >
-            {authorSelected && (
-                <FullScreenDialog 
-                    title={`Author Details`}
-                    open={authorSelected}
-                    setOpen={() => setAuthorSelected(null)} >
-                    <AuthorDetails author={authorSelected} />
-                </FullScreenDialog>
-            )}
-            {editionSelected && (
-                <FullScreenDialog 
-                    title={`Edition Details`}
-                    open={editionSelected}
-                    setOpen={() => setEditionSelected(null)} >
-                    <EditionDetails edition={editionSelected} />
-                </FullScreenDialog>
-            )}
-            <Grid item xs={6}>
-                <SelectBook 
-                    books={books} 
-                    value={bookId} 
-                    handleSelect={handleSelectBook} />
-            </Grid>
-            <Grid item xs={2}/>
-            <Grid item xs={4}>
-                <BasicMenu 
-                    disabled={(!id && !bookId && !chapterId)} 
-                    title="Actions" 
-                    items={itemsMenu} 
-                    sx={{ float: "right" }} />
-            </Grid>
-            <Grid item xs={12}>
-                <FormGroup sx={{ float: "right" }}>
-                    <FormControlLabel
-                        label="Synchronized scroll"
-                        control={
-                            <Switch 
-                                disabled={!comments || comments.length === 0}
-                                color="secondary"
-                                checked={isSyncTextComment} 
-                                onChange={handleSyncComment} />}
-                    />
-                </FormGroup>
-            </Grid>
-            <Fade in={showFiltersComment} appear={false} unmountOnExit={true}>
-                <Grid item xs={12}>
-                    <FilteredComment handleSave={serachCommentByFilter} />
+        <>
+            <ExportModal show={modalShow} onHide={() => setModalShow(false)} data={operaInfo} idOpera={id} />
+            <Grid
+                container
+                direction="row"
+                spacing={2} >
+                {authorSelected && (
+                    <FullScreenDialog
+                        title={`Author Details`}
+                        open={authorSelected}
+                        setOpen={() => setAuthorSelected(null)} >
+                        <AuthorDetails author={authorSelected} />
+                    </FullScreenDialog>
+                )}
+                {editionSelected && (
+                    <FullScreenDialog
+                        title={`Edition Details`}
+                        open={editionSelected}
+                        setOpen={() => setEditionSelected(null)} >
+                        <EditionDetails edition={editionSelected} />
+                    </FullScreenDialog>
+                )}
+                <Grid item xs={6}>
+                    <SelectBook
+                        books={books}
+                        value={bookId}
+                        handleSelect={handleSelectBook} />
                 </Grid>
-            </Fade>
-            <Grid item xs={12} md={8}>
-                <Paper style={{ height: 550, marginTop: 15 }}>
-                    <ChapterTabs
-                        chapters={chaptersOfBook}
+                <Grid item xs={2} />
+                <Grid item xs={4}>
+                    <BasicMenu
+                        disabled={(!id && !bookId && !chapterId)}
+                        title="Actions"
+                        items={itemsMenu}
+                        sx={{ float: "right" }} />
+                </Grid>
+                <Grid item xs={12}>
+                    <FormGroup sx={{ float: "right" }}>
+                        <FormControlLabel
+                            label="Synchronized scroll"
+                            control={
+                                <Switch
+                                    disabled={!comments || comments.length === 0}
+                                    color="secondary"
+                                    checked={isSyncTextComment}
+                                    onChange={handleSyncComment} />}
+                        />
+                    </FormGroup>
+                </Grid>
+                <Fade in={showFiltersComment} appear={false} unmountOnExit={true}>
+                    <Grid item xs={12}>
+                        <FilteredComment handleSave={serachCommentByFilter} />
+                    </Grid>
+                </Fade>
+                <Grid item xs={12} md={8}>
+                    <Paper style={{ height: 550, marginTop: 15 }}>
+                        <ChapterTabs
+                            chapters={chaptersOfBook}
+                            paragraphs={paragraphs}
+                            value={chapterId}
+                            handleSelect={handleSelectChapter}
+                            handleCommentParagraph={handleCommentParagraph} />
+                    </Paper>
+                </Grid>
+                <Grid item xs={12} md={4}>
+                    <CommentContainer
+                        comments={comments}
                         paragraphs={paragraphs}
-                        value={chapterId} 
-                        handleSelect={handleSelectChapter}
-                        handleCommentParagraph={handleCommentParagraph} />
-                </Paper>
-            </Grid>
-            <Grid item xs={12} md={4}>
-                <CommentContainer 
-                    comments={comments} 
-                    paragraphs={paragraphs} 
-                    handleUpdateComment={handleUpdateComment} />
-            </Grid>
-            {/*<Grid item xs={12} md={6}>
+                        handleUpdateComment={handleUpdateComment} />
+                </Grid>
+                {/*<Grid item xs={12} md={6}>
                 <CardAuthor authors={authors} handleSelect={(author) => setAuthorSelected(author)} />
             </Grid>
             <Grid item xs={12} md={6}>
                 <CardEdition editions={editions} handleSelect={(edition) => setEditionSelected(edition)}/>
             </Grid>*/}
-            {isUserAccessAddComment &&
-                (<Grid item xs={12}>
-                    <CommentParagraph 
-                        opera={{
-                            idOpera: id,
-                            idBook: bookId,
-                            idChapter: chapterId,
-                            idParagraph: paragraphId
-                        }}
-                        paragraphs={paragraphs} 
-                        commentUpdate={commentUpdate} 
-                        handleResetUpdateComment={() => setCommentUpdate(null)} />
-                </Grid>)}
-        </Grid>
+                {isUserAccessAddComment &&
+                    (<Grid item xs={12}>
+                        <CommentParagraph
+                            opera={{
+                                idOpera: id,
+                                idBook: bookId,
+                                idChapter: chapterId,
+                                idParagraph: paragraphId
+                            }}
+                            paragraphs={paragraphs}
+                            commentUpdate={commentUpdate}
+                            handleResetUpdateComment={() => setCommentUpdate(null)} />
+                    </Grid>)}
+            </Grid>
+        </>
     )
 }
 
