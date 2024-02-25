@@ -4,17 +4,19 @@ const service = `${process.env.REACT_APP_BACKEND_ENDPOINT}`;
 const opereApi = axios.create({
     baseURL: service,
     headers: {
-      'Accept': 'application/json',
+        'Accept': 'application/json',
     },
     withCredentials: true,
     credential: true
 });
 
 const fetchAllOpere = ({ page, forPage }) => {
-    return opereApi.get(`/opera`, { params: { 
-        page,
-        forPage
-    }});
+    return opereApi.get(`/opera`, {
+        params: {
+            page,
+            forPage
+        }
+    });
 }
 
 const fetchOpera = async (id) => {
@@ -22,7 +24,7 @@ const fetchOpera = async (id) => {
 }
 
 const fetchBooksByOpera = async (idOpera = null) => {
-    if(!idOpera) {
+    if (!idOpera) {
         return;
     }
 
@@ -68,11 +70,11 @@ const fetchAutocompleteOutRichText = async (idOpera, search = "") => {
 }
 
 const fetchAutocompleteInRichText = async (idOpera, search = "") => {
-    return await opereApi.get(`/rich_text/in`, { params: { idOpera: idOpera, value:  search} });
+    return await opereApi.get(`/rich_text/in`, { params: { idOpera: idOpera, value: search } });
 }
 
 const fetchAutocompleteCommentRichText = async (idOpera, search = "") => {
-    return await opereApi.get(`/rich_text/comment`, { params: { idOpera: idOpera, value:  search} });
+    return await opereApi.get(`/rich_text/comment`, { params: { idOpera: idOpera, value: search } });
 }
 
 const fetchTags = async (search = "") => {
@@ -107,25 +109,22 @@ const fetchPostDiscussionByRoom = async (body) => {
     return await opereApi.post(`/discussion`, { ...body });
 }
 
-export {
-    fetchAllOpere,
-    fetchOpera,
-    fetchBooksByOpera,
-    fetchParagraph,
-    fetchUploadOpera,
-    fetchAllAuthorByOpera,
-    fetchAllEditionByOpera,
-    fetchAllComment,
-    postComment,
-    fetchAutocompleteOutRichText,
-    fetchAutocompleteInRichText,
-    fetchTags,
-    fetchPostComment,
-    fetchPostTag,
-    fetchAutocompleteCommentRichText,
-    fetchCommentsReview,
-    fetchCreateRoom,
-    fetchCommentsByRoom,
-    fetchDiscussionByRoom,
-    fetchPostDiscussionByRoom
+const fetchOperaInfo = async (idOpera = null) => {
+    if (!idOpera) {
+        return;
+    }
+
+    return await opereApi.get(`/export_comments/${idOpera}`);
 }
+
+const exportComments = async (body, idOpera) => {
+    if (!idOpera) {
+        return;
+    }
+    return await opereApi.post(`export_comments/commentNdPar/${idOpera}`, body)
+}
+
+export {
+    fetchAllAuthorByOpera, fetchAllComment, fetchAllEditionByOpera, fetchAllOpere, fetchAutocompleteCommentRichText, fetchAutocompleteInRichText, fetchAutocompleteOutRichText, fetchBooksByOpera, fetchCommentsByRoom, fetchCommentsReview,
+    fetchCreateRoom, fetchDiscussionByRoom, fetchOpera, fetchOperaInfo, fetchParagraph, fetchPostComment, fetchPostDiscussionByRoom, fetchPostTag, fetchTags, fetchUploadOpera, postComment
+};
