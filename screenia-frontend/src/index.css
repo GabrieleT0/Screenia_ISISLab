@@ -11,3 +11,60 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.modal-backdrop {
+  z-index: 100000 !important;
+}
+
+.modal {
+  z-index: 100001 !important;
+}
+
+.dropSelect {
+  width: 80%;
+}
+
+.dropdown {
+  width: 230px !important;
+}
+
+.dropdown-content {
+  height: 350px !important;
+  width: 100%;
+  overflow-y: auto;
+  position: absolute;
+}
+
+.dropSelect .dropdown-trigger {
+  border-radius: 10px;
+}
+
+.dropSelect .toggle {
+  font: normal normal normal 15px/1 FontAwesome;
+  color: #1f1f1f;
+}
+
+#dropdown-tags {
+  background-color: #2096f3;
+}
+
+#dropdown-editors {
+  background-color: #2096f3;
+}
+
+.editor-checkboxes {
+  margin-right: 9px;
+  margin-top: 3px;
+  margin-left: 7px;
+}
+
+.tag-checkboxes {
+  margin-right: 9px;
+  margin-top: 3px;
+  margin-left: 7px;
+}
+
+.export-title {
+  margin-top: 10px;
+  margin-right: 10px;
+}
