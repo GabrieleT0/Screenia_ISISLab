@@ -126,5 +126,5 @@ const exportComments = async (body, idOpera) => {
 
 export {
     fetchAllAuthorByOpera, fetchAllComment, fetchAllEditionByOpera, fetchAllOpere, fetchAutocompleteCommentRichText, fetchAutocompleteInRichText, fetchAutocompleteOutRichText, fetchBooksByOpera, fetchCommentsByRoom, fetchCommentsReview,
-    fetchCreateRoom, fetchDiscussionByRoom, fetchOpera, fetchOperaInfo, fetchParagraph, fetchPostComment, fetchPostDiscussionByRoom, fetchPostTag, fetchTags, fetchUploadOpera, postComment
+    fetchCreateRoom, fetchDiscussionByRoom, fetchOpera, fetchOperaInfo, fetchParagraph, fetchPostComment, fetchPostDiscussionByRoom, fetchPostTag, fetchTags, fetchUploadOpera, postComment, exportComments
 };
