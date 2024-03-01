@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import Button from 'react-bootstrap/Button';
 import Col from 'react-bootstrap/Col';
 import Container from 'react-bootstrap/Container';
@@ -9,14 +9,14 @@ import Row from 'react-bootstrap/Row';
 import DropdownTreeSelect from "react-dropdown-tree-select";
 import 'react-dropdown-tree-select/dist/styles.css';
 import { toast } from 'react-toastify';
-import { fetchTags } from '../../api/opereApi';
+import { fetchTags, exportComments } from '../../api/opereApi';
 import { fetchUsersEditors } from '../../api/userApi';
 
 function ExportModal(props) {
     const [editors, setEditors] = useState(null);
     const [selectedEditors, setCheckboxEd] = useState([]);
     const [selectedFormatForm, setFormatForm] = useState(null);
-    const [selectedParagraps, setSelectedPar] = useState(null);
+    const [selectedParagraps, setSelectedPar] = useState([]);
     const [selectedFormat, setSelectedFormat] = useState(null);
     const [tagList, setTags] = useState(null);
     const [selectedTags, setSelectedTag] = useState([]);
@@ -88,18 +88,38 @@ function ExportModal(props) {
         }
     }
 
+    async function fetchCommentAndPar(postData,operaId){
+        try {
+            const commentsResponse = await exportComments(postData,operaId);
+            return commentsResponse
+        } catch (error) {
+            console.error('Error during the comments fetch', error);
+        }
+    }
+
+    const DropDownTreeSelect = useMemo(() => {
+        return (
+          <DropdownTreeSelect
+            data={props.data}
+            onChange={(currentNode, selectedNodes) => {
+              setSelectedPar(selectedNodes)
+            }}
+            texts={{ placeholder: "Select paragraphs" }}
+            className="dropSelect"
+          />
+        )
+      }, [props.data])
+    
     const handleSendForm = (props) => {
         const request_data = {
             format: selectedFormat,
             editors: selectedEditors,
+            tags: selectedTags,
             paragraps: selectedParagraps
         }
-        console.log(request_data)
+        const comments = fetchCommentAndPar(request_data,props.idOpera)
+        console.log(comments)
     }
-
-    const onChange = (currentNode, selectedNodes) => {
-        setSelectedPar(selectedNodes)
-    };
 
     const handleSelectAllEd = () => {
         if (!selectAllEd) {
@@ -131,10 +151,7 @@ function ExportModal(props) {
                 <Container>
                     <Row>
                         <Col md={4}>
-                            <DropdownTreeSelect className='dropSelect'
-                                data={props.data}
-                                onChange={() => onChange}
-                            />
+                            {DropDownTreeSelect}
                         </Col>
                         <Col md={2}>
                             <Dropdown>
