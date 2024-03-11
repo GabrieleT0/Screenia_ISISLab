@@ -95,15 +95,10 @@ const findAllComment = async (conditions, username, tags) => {
     }
 }
 
-const findCommentWithPar = async (conditions, books, chapters, usernames, tags) => {
+const findCommentWithPar = async (where_value_comments, usernames, tags) => {
     try {
         const comments = await comment_paragraph.findAll({
-            where: {
-                id_opera: conditions.idOpera,
-                number_book: Array.isArray(books) ? { [Op.in]: books } : books,
-                number_chapter: Array.isArray(chapters) ? { [Op.in]: chapters } : chapters,
-                parent_id: null
-            },
+            where: where_value_comments,
             include: [
                 {
                     model: tag,

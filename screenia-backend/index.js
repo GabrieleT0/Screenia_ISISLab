@@ -22,6 +22,7 @@ const commentReviewRouter = require("./routes/comment_paragraph_review/index");
 const roomRouter = require("./routes/room/index");
 const discussionRouter = require("./routes/discussion/index");
 const userRouter = require("./routes/user/index");
+const export_comments = require("./routes/export_comments/index");
 const cookieParser = require('cookie-parser');
 
 //resolve cors
@@ -29,10 +30,10 @@ app.use(cors({ credentials: true, origin: true }))
 
 // enable files upload
 app.use(fileUpload({
-    createParentPath: true,
-    useTempFiles : true,
-    tempFileDir : './tmp',
-    //debug: true
+  createParentPath: true,
+  useTempFiles: true,
+  tempFileDir: './tmp',
+  //debug: true
 }));
 
 // Enabled middleware.
@@ -55,5 +56,5 @@ app.use('/user', userRouter);
 app.use('/auth', authRouter);
 app.use('/room', roomRouter);
 app.use('/discussion', discussionRouter);
-
+app.use('/export_comments', export_comments);
 app.listen(3001);

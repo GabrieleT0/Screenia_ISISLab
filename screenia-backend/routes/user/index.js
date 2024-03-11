@@ -17,9 +17,9 @@ router.get(
 )
 
 router.post(
-   '/approval', 
+   '/approval',
    (req, res, next) => verifyToken(req, res, next, ["admin"]),
-   approveUsers 
+   approveUsers
 )
 
 module.exports = router;
