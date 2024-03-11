@@ -1,6 +1,5 @@
 const express = require('express');
 import verifyToken from "../../middlware/verifyToken";
-import { paragraph } from "../../models";
 import CommentParagraphService from "../../services/comment_paragraph";
 import RoomService from "../../services/room";
 const router = express.Router();
@@ -94,40 +93,6 @@ router.post('/:idOpera/:idBook/:idChapter',
       res.status(200).send(data);
     } catch (e) {
 
-
-      res.status(500).send({
-        error: e,
-        message: e.message
-      });
-    }
-
-  })
-
-//TODO: only admin can call this (another route for editor and reader)
-router.post('/commentNdPar/:idOpera/',
-  async function (req, res) {
-    const params = { ...req.params }
-    const usernames = req.body.usernames;
-    const books = req.body.books;
-    const chapters = req.body.chapters;
-    const tags = req.body.tags;
-    try {
-      const data = await CommentParagraphService.findCommentWithPar({ ...params }, books, chapters, usernames, [...tags]);
-      for (let i = 0; i < data.length; i++) {
-        const results = await paragraph.findOne({
-          where: {
-            id_opera: data[i].id_opera,
-            number_book: data[i].number_book,
-            number_chapter: data[i].number_chapter,
-            number: data[i].number_paragraph,
-          },
-          order: [['number', 'ASC']],
-          raw: true
-        })
-        data[i]['paragraph'] = results
-      }
-      res.status(200).send(data);
-    } catch (e) {
 
       res.status(500).send({
         error: e,
