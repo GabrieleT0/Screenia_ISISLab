@@ -115,10 +115,10 @@ function ExportModal(props) {
             format: selectedFormat,
             editors: selectedEditors,
             tags: selectedTags,
-            paragraps: selectedParagraps
+            paragraphs: selectedParagraps
         }
+        console.log(request_data)
         const comments = fetchCommentAndPar(request_data,props.idOpera)
-        console.log(comments)
     }
 
     const handleSelectAllEd = () => {
