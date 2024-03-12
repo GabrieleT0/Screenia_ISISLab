@@ -11,6 +11,8 @@ import 'react-dropdown-tree-select/dist/styles.css';
 import { toast } from 'react-toastify';
 import { fetchTags, exportComments } from '../../api/opereApi';
 import { fetchUsersEditors } from '../../api/userApi';
+import Alert from 'react-bootstrap/Alert';
+import NumericInput from 'react-numeric-input';
 
 function ExportModal(props) {
     const [editors, setEditors] = useState(null);
@@ -22,6 +24,9 @@ function ExportModal(props) {
     const [selectedTags, setSelectedTag] = useState([]);
     const [selectAllEd, setSelectAllEd] = useState(false);
     const [selectAllTags, setSelectAllTags] = useState(false);
+    const [errorMessage, setErrorMessage] = useState(false);
+    const [pdfStyle,setPdfStyle] = useState('Courier');
+    const [fontSize,setFontSize] = useState(12);
 
     async function getTags() {
         try {
@@ -71,9 +76,28 @@ function ExportModal(props) {
     const handleExportFormat = e => {
         if (e.target.value === 'pdf') {
             const export_form = (
-                <Form.Group>
-                    <p>You have selected {e.target.value}</p>
-                </Form.Group>
+                <>
+                    <p><b>PDF export options</b></p>
+                    <Form.Select aria-label="Style select" onChange={(e) => setPdfStyle(e.currentTarget.value)}>
+                        <option>Select font style</option>
+                        <option value="Courier">Courier</option>
+                        <option value="Courier-Bold">Courier-Bold</option>
+                        <option value="Courier-Oblique">Courier-Oblique</option>
+                        <option value="Courier-BoldOblique">Courier-BoldOblique</option>
+                        <option value="Helvetica">Helvetica</option>
+                        <option value="Helvetica-Bold">Helvetica-Bold</option>
+                        <option value="Helvetica-Oblique">Helvetica-Oblique</option>
+                        <option value="Helvetica-BoldOblique">Helvetica-BoldOblique</option>
+                        <option value="Symbol">Symbol</option>
+                        <option value="Times-Roman">Times-Roman</option>
+                        <option value="Times-Bold">Times-Bold</option>
+                        <option value="Times-Italic">Times-Italic</option>
+                        <option value="Times-BoldItalic">Times-BoldItalic</option>
+                        <option value="ZapfDingbats">ZapfDingbats</option>
+                    </Form.Select>
+                    <p>Font size:</p>
+                    <NumericInput min={5} max={50} value={12} onChange={(e) => setFontSize(e)}/>
+                </>
             )
             setFormatForm(export_form)
             setSelectedFormat(e.target.value)
@@ -111,14 +135,65 @@ function ExportModal(props) {
       }, [props.data])
     
     const handleSendForm = (props) => {
-        const request_data = {
-            format: selectedFormat,
-            editors: selectedEditors,
-            tags: selectedTags,
-            paragraphs: selectedParagraps
+        let error_message = ''
+        setErrorMessage(null)
+
+        if(!selectedFormat){
+            error_message += '\nFormat not selected'
+        } else if (selectedFormat === 'pdf'){
         }
-        console.log(request_data)
-        const comments = fetchCommentAndPar(request_data,props.idOpera)
+        if(selectedEditors.length === 0){
+            error_message += '\nSelect at least one editors'
+        }
+        if(selectedTags.length === 0){
+            error_message += '\nSelect at least one tag'
+        }
+        if(selectedParagraps.length === 0){
+            error_message += '\nSelect at least one paragraph'
+        }
+        if(error_message !== ''){
+            let error_alert =(        
+                <Alert key={'error_form'} variant={'danger'}>{error_message}</Alert>
+                )
+            setErrorMessage(error_alert)
+            return
+        }
+        let request_data = {}
+        switch(selectedFormat){
+            case 'pdf':
+                request_data = {
+                    format: selectedFormat,
+                    editors: selectedEditors,
+                    tags: selectedTags,
+                    paragraphs: selectedParagraps,
+                    font_size: fontSize,
+                    font_family: pdfStyle
+                }
+            break;
+
+            default:
+                request_data = {
+                    format: selectedFormat,
+                    editors: selectedEditors,
+                    tags: selectedTags,
+                    paragraphs: selectedParagraps
+                }
+        }
+
+        fetchCommentAndPar(request_data,props.idOpera).then(
+            response =>{
+                const blob = new Blob([response.data], { type: response.headers['content-type'] });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                let response_format = response.headers['content-type'].split('/')[1]
+                link.download = `exported_comments.${response_format}`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        )
+
     }
 
     const handleSelectAllEd = () => {
@@ -148,6 +223,7 @@ function ExportModal(props) {
                 <Modal.Title>Export comments</Modal.Title>
             </Modal.Header>
             <Modal.Body>
+                {errorMessage}
                 <Container>
                     <Row>
                         <Col md={4}>

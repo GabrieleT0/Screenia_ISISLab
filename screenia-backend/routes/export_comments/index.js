@@ -3,6 +3,8 @@ import { book, paragraph } from "../../models";
 import BookService from "../../services/book";
 import CommentParagraphService from "../../services/comment_paragraph";
 import { to_single_list } from "../../../screenia-frontend/src/utils/utils";
+import { generate_pdf } from "../../utils/pdf_export";
+import fs from 'fs'
 const router = express.Router();
 
 
@@ -89,6 +91,23 @@ router.post('/commentNdPar/:idOpera/',
         const format = req.body.format;
         const tags = req.body.tags;
         const paragraphs = req.body.paragraphs;
+
+        if (!idOpera ) {
+            return res.send(400, "Param idOpera is required!");
+        }
+        if (!editors) {
+            return res.send(400, "Param editors is required!");
+        }
+        if (!format) {
+            return res.send(400, "Param format is required!");
+        }
+        if (!tags) {
+            return res.send(400, "Param tags is required!");
+        }
+        if (paragraphs.length == 0) {
+            return res.send(400, "Param paragraphs is required!");
+        }
+
         let books_comments = []
         let chapters_comments = []
         let paragraphs_comments = []
@@ -143,7 +162,20 @@ router.post('/commentNdPar/:idOpera/',
                 })
                 all_comments[i]['paraghraph'] = results
             }
-            return res.send(all_comments)
+            switch(format){
+                case 'pdf':
+                    const font_size = req.body.font_size;
+                    const font_family = req.body.font_family;
+                    const pdfData = await generate_pdf(font_size,font_family,all_comments);
+                    res.writeHead(200, {
+                        'Content-Type': 'application/pdf',
+                        'Content-Disposition': 'inline; filename=exported_comments.pdf',
+                        'Content-Length': pdfData.length,
+                    });
+                res.end(pdfData);
+                break;
+            }
+
     } catch (e){
         console.log(e)
         return res.status(500).send({

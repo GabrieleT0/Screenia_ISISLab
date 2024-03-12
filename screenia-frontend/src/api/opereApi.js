@@ -121,7 +121,7 @@ const exportComments = async (body, idOpera) => {
     if (!idOpera) {
         return;
     }
-    return await opereApi.post(`export_comments/commentNdPar/${idOpera}`, body)
+    return await opereApi.post(`export_comments/commentNdPar/${idOpera}`, body,{responseType: 'arraybuffer'})
 }
 
 export {
