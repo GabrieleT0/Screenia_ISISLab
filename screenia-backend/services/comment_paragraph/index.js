@@ -1,5 +1,5 @@
 import { Op, Sequelize } from "sequelize";
-import { comment_paragraph, db, room, tag, user } from "../../models";
+import { comment_paragraph, db, room, tag, user, opera_primary_literature } from "../../models";
 import RoomService from "../room";
 
 

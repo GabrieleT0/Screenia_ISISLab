@@ -5,6 +5,7 @@ import CommentParagraphService from "../../services/comment_paragraph";
 import { to_single_list } from "../../../screenia-frontend/src/utils/utils";
 import { generate_pdf } from "../../utils/pdf_export";
 import fs from 'fs'
+import OperaService from "../../services/opera";
 const router = express.Router();
 
 
@@ -162,11 +163,12 @@ router.post('/commentNdPar/:idOpera/',
                 })
                 all_comments[i]['paraghraph'] = results
             }
+            const opera_info = await OperaService.getOperaById(idOpera)
             switch(format){
                 case 'pdf':
                     const font_size = req.body.font_size;
                     const font_family = req.body.font_family;
-                    const pdfData = await generate_pdf(font_size,font_family,all_comments);
+                    const pdfData = await generate_pdf(font_size,font_family,all_comments,opera_info.dataValues);
                     res.writeHead(200, {
                         'Content-Type': 'application/pdf',
                         'Content-Disposition': 'inline; filename=exported_comments.pdf',
