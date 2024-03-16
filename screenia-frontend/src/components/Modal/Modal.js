@@ -103,9 +103,28 @@ function ExportModal(props) {
             setSelectedFormat(e.target.value)
         } else if (e.target.value === 'epub') {
             const export_form = (
-                <Form.Group>
-                    <p>You have selected {e.target.value}</p>
-                </Form.Group>
+                <>
+                    <p><b>EPUB export options</b></p>
+                    <Form.Select aria-label="Style select" onChange={(e) => setPdfStyle(e.currentTarget.value)}>
+                        <option>Select font style</option>
+                        <option value="Courier">Courier</option>
+                        <option value="Courier-Bold">Courier-Bold</option>
+                        <option value="Courier-Oblique">Courier-Oblique</option>
+                        <option value="Courier-BoldOblique">Courier-BoldOblique</option>
+                        <option value="Helvetica">Helvetica</option>
+                        <option value="Helvetica-Bold">Helvetica-Bold</option>
+                        <option value="Helvetica-Oblique">Helvetica-Oblique</option>
+                        <option value="Helvetica-BoldOblique">Helvetica-BoldOblique</option>
+                        <option value="Symbol">Symbol</option>
+                        <option value="Times-Roman">Times-Roman</option>
+                        <option value="Times-Bold">Times-Bold</option>
+                        <option value="Times-Italic">Times-Italic</option>
+                        <option value="Times-BoldItalic">Times-BoldItalic</option>
+                        <option value="ZapfDingbats">ZapfDingbats</option>
+                    </Form.Select>
+                    <p>Font size:</p>
+                    <NumericInput min={5} max={50} value={12} onChange={(e) => setFontSize(e)}/>
+                </>
             )
             setFormatForm(export_form)
             setSelectedFormat(e.target.value)
@@ -139,17 +158,17 @@ function ExportModal(props) {
         setErrorMessage(null)
 
         if(!selectedFormat){
-            error_message += '\nFormat not selected'
+            error_message += '\n Format not selected'
         } else if (selectedFormat === 'pdf'){
         }
         if(selectedEditors.length === 0){
-            error_message += '\nSelect at least one editors'
+            error_message += '\n Select at least one editors'
         }
         if(selectedTags.length === 0){
-            error_message += '\nSelect at least one tag'
+            error_message += '\n Select at least one tag'
         }
         if(selectedParagraps.length === 0){
-            error_message += '\nSelect at least one paragraph'
+            error_message += '\n Select at least one paragraph'
         }
         if(error_message !== ''){
             let error_alert =(        
@@ -171,6 +190,17 @@ function ExportModal(props) {
                 }
             break;
 
+            case 'epub':
+                request_data = {
+                    format: selectedFormat,
+                    editors: selectedEditors,
+                    tags: selectedTags,
+                    paragraphs: selectedParagraps,
+                    font_size: fontSize,
+                    font_family: pdfStyle
+                }
+            break
+
             default:
                 request_data = {
                     format: selectedFormat,
@@ -187,7 +217,9 @@ function ExportModal(props) {
                 const link = document.createElement('a');
                 link.href = url;
                 let response_format = response.headers['content-type'].split('/')[1]
-                link.download = `exported_comments.${response_format}`;
+                if(response_format === 'octet-stream'){
+                    link.download = `exported_comments.epub`;
+                }
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);

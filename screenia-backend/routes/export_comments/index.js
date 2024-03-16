@@ -6,6 +6,7 @@ import { to_single_list } from "../../../screenia-frontend/src/utils/utils";
 import { generate_pdf } from "../../utils/pdf_export";
 import fs from 'fs'
 import OperaService from "../../services/opera";
+import { generate_epub } from "../../utils/epub_export";
 const router = express.Router();
 
 
@@ -92,6 +93,8 @@ router.post('/commentNdPar/:idOpera/',
         const format = req.body.format;
         const tags = req.body.tags;
         const paragraphs = req.body.paragraphs;
+        const font_size = req.body.font_size;
+        const font_family = req.body.font_family;
 
         if (!idOpera ) {
             return res.send(400, "Param idOpera is required!");
@@ -166,8 +169,6 @@ router.post('/commentNdPar/:idOpera/',
             const opera_info = await OperaService.getOperaById(idOpera)
             switch(format){
                 case 'pdf':
-                    const font_size = req.body.font_size;
-                    const font_family = req.body.font_family;
                     const pdfData = await generate_pdf(font_size,font_family,all_comments,opera_info.dataValues);
                     res.writeHead(200, {
                         'Content-Type': 'application/pdf',
@@ -175,6 +176,18 @@ router.post('/commentNdPar/:idOpera/',
                         'Content-Length': pdfData.length,
                     });
                 res.end(pdfData);
+                break;
+                case 'epub':
+                    generate_epub(font_size, font_family, all_comments, opera_info.dataValues).then((epubBuffer) => {
+                        res.writeHead(200, {
+                            'Content-Type': 'application/octet-stream',
+                            'Content-Disposition': 'inline; filename=exported_comments.epub',
+                            'Content-Length': epubBuffer.length,
+                        });
+                    res.end(epubBuffer);
+                    }).catch((err) => {
+                        console.error('Error during the epub generation:', err);
+                    });
                 break;
             }
 
