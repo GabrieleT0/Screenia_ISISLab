@@ -128,6 +128,9 @@ function ExportModal(props) {
             )
             setFormatForm(export_form)
             setSelectedFormat(e.target.value)
+        } else if (e.target.value === 'txt'){
+            setFormatForm(null)
+            setSelectedFormat(e.target.value)
         }
     }
 
@@ -201,6 +204,15 @@ function ExportModal(props) {
                 }
             break
 
+            case 'txt':
+                request_data = {
+                    format: selectedFormat,
+                    editors: selectedEditors,
+                    tags: selectedTags,
+                    paragraphs: selectedParagraps,
+                }
+            break
+
             default:
                 request_data = {
                     format: selectedFormat,
@@ -219,6 +231,10 @@ function ExportModal(props) {
                 let response_format = response.headers['content-type'].split('/')[1]
                 if(response_format === 'octet-stream'){
                     link.download = `exported_comments.epub`;
+                } else if (response_format === 'pdf'){
+                    link.download = 'exported_comments.pdf'
+                } else if (response_format === 'octet-stream; charset=utf-8'){
+                    link.download = 'exported_comments.txt'
                 }
                 document.body.appendChild(link);
                 link.click();
@@ -327,6 +343,16 @@ function ExportModal(props) {
                     </Row>
                     <Form.Group>
                         <Form.Label className="export-title">Export formats:</Form.Label>
+                        <Form.Check
+                            inline
+                            required
+                            name="formats-group"
+                            type="radio"
+                            label=".txt"
+                            id="txt-export"
+                            value="txt"
+                            onChange={handleExportFormat}
+                        />
                         <Form.Check
                             inline
                             required

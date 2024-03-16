@@ -7,6 +7,7 @@ import { generate_pdf } from "../../utils/pdf_export";
 import fs from 'fs'
 import OperaService from "../../services/opera";
 import { generate_epub } from "../../utils/epub_export";
+import { generate_txt } from "../../utils/txt_export";
 const router = express.Router();
 
 
@@ -188,6 +189,15 @@ router.post('/commentNdPar/:idOpera/',
                     }).catch((err) => {
                         console.error('Error during the epub generation:', err);
                     });
+                break;
+                case 'txt':
+                    const txt_content = generate_txt(all_comments,opera_info.dataValues)
+                    res.set({
+                        'Content-Type': 'application/octet-stream',
+                        'Content-Disposition': 'attachment; filename="file.txt"'
+                      });
+                      res.send(txt_content)
+
                 break;
             }
 
