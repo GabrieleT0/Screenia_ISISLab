@@ -19,6 +19,7 @@ import { commentAtom } from '../../state/comment/commentAtom';
 import confirmModalAtom from '../../state/modal/confirmModalAtom';
 import QuillRichText from '../QuillRichText/QuillRichText';
 import TagAutocomplete from '../Tag/TagAutocomplete';
+import { isObject } from 'lodash';
 
 const CommentParagraph = ({ 
     opera = null,
@@ -147,11 +148,19 @@ const CommentParagraph = ({
     }
 
     const handleSetRange = (value, range) => {
+        if(isObject(value)){
+            if(range === "from") {
+                setFromRange({ number:value.number,label:value.label });
+            } else if(range === "to") {
+                setToRange({ number:value.number,label:value.label });
+            }
+        } else{
         if(range === "from") {
             setFromRange({ number:value,label:value });
         } else if(range === "to") {
-            setToRange({ number:value,label:value});
+            setToRange({ number:value,label:value });
         }
+    }
     }
 
     const validateComment = () => {
