@@ -1,6 +1,5 @@
 import epub from 'epub-gen' 
 import fs from 'fs';
-import { paragraph } from '../models';
 
 async function generate_epub(font_size,font_family,text_obj,opera_info){
     const temp_path = './exported_comments.epub'

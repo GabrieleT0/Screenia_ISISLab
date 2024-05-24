@@ -8,6 +8,8 @@ import fs from 'fs'
 import OperaService from "../../services/opera";
 import { generate_epub } from "../../utils/epub_export";
 import { generate_txt } from "../../utils/txt_export";
+import { generate_pptx } from "../../utils/pptx_export";
+import { error } from "console";
 const router = express.Router();
 
 
@@ -121,6 +123,7 @@ router.post('/commentNdPar/:idOpera/',
                 let where_value_comments = {}
                 let data;
                 switch(paragraphs[i].tag){
+                    
                     case 'Book':
                         where_value_comments = {
                             id_opera: paragraphs[i].value.opera_id,
@@ -130,6 +133,7 @@ router.post('/commentNdPar/:idOpera/',
                         data = await CommentParagraphService.findCommentWithPar(where_value_comments, editors, [...tags]);
                         books_comments.push(data)
                         break;
+
                     case 'Chapter':
                         where_value_comments = {
                             id_opera: paragraphs[i].value.opera_id,
@@ -140,6 +144,7 @@ router.post('/commentNdPar/:idOpera/',
                         data = await CommentParagraphService.findCommentWithPar(where_value_comments, editors, [...tags]);
                         chapters_comments.push(data)
                         break;
+
                     case 'Paragraph':
                         where_value_comments = {
                             id_opera: paragraphs[i].value.opera_id,
@@ -151,6 +156,7 @@ router.post('/commentNdPar/:idOpera/',
                         data = await CommentParagraphService.findCommentWithPar(where_value_comments, editors, [...tags]);
                         paragraphs_comments.push(data)
                         break;
+
                 }
             }
             const all_comments = to_single_list(books_comments,chapters_comments,paragraphs_comments)
@@ -169,6 +175,7 @@ router.post('/commentNdPar/:idOpera/',
             }
             const opera_info = await OperaService.getOperaById(idOpera)
             switch(format){
+
                 case 'pdf':
                     const pdfData = await generate_pdf(font_size,font_family,all_comments,opera_info.dataValues);
                     res.writeHead(200, {
@@ -178,6 +185,7 @@ router.post('/commentNdPar/:idOpera/',
                     });
                 res.end(pdfData);
                 break;
+
                 case 'epub':
                     generate_epub(font_size, font_family, all_comments, opera_info.dataValues).then((epubBuffer) => {
                         res.writeHead(200, {
@@ -190,6 +198,7 @@ router.post('/commentNdPar/:idOpera/',
                         console.error('Error during the epub generation:', err);
                     });
                 break;
+
                 case 'txt':
                     const txt_content = generate_txt(all_comments,opera_info.dataValues)
                     res.set({
@@ -197,7 +206,18 @@ router.post('/commentNdPar/:idOpera/',
                         'Content-Disposition': 'attachment; filename="file.txt"'
                       });
                       res.send(txt_content)
+                break;
 
+                case 'pptx':
+                    generate_pptx().then((pptx_buffer) => {
+                        res.writeHead(200, {
+                            'Content-Type': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                            'Content-Disposition': 'attachment; filename="exported_comments.pptx"'
+                        });
+                        res.end(pptx_buffer)
+                    }).catch((err) => {
+                        console.error('Error during the pptx generation:',err)
+                    });
                 break;
             }
 
