@@ -57,4 +57,4 @@ app.use('/auth', authRouter);
 app.use('/room', roomRouter);
 app.use('/discussion', discussionRouter);
 app.use('/export_comments', export_comments);
-app.listen(3001);
+app.listen(3002);

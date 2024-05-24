@@ -279,9 +279,6 @@ const OperaDetailsPage = () => {
     }
 
     const handleUpdateComment = (commentOnPassed) => {
-        if (!commentOnPassed) return;
-
-
 
         setCommentUpdate({ ...commentOnPassed });
     }

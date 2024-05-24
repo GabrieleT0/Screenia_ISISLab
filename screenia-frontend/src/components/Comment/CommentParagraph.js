@@ -37,8 +37,8 @@ const CommentParagraph = ({
         convertToRaw: {}
     });
     //const [editor, setEditor] = useState(() => EditorState.createEmpty());
-    const [fromRange, setFromRange] = useState(0);
-    const [toRange, setToRange] = useState(0);
+    const [fromRange, setFromRange] = useState({ number: '', label: '' });
+    const [toRange, setToRange] = useState({ number: '', label: '' });
     const [typeUpdate, setTypeUpdate] = useState(null);
 
     //Set comment filter for reload comments
@@ -59,7 +59,6 @@ const CommentParagraph = ({
 
     useEffect(() => {
         if(!commentUpdate || !commentUpdate.idComment) return;
-
         handleSetRange(commentUpdate.from, "from")
         handleSetRange(commentUpdate.to, "to")
         setTextEditor({
@@ -149,9 +148,9 @@ const CommentParagraph = ({
 
     const handleSetRange = (value, range) => {
         if(range === "from") {
-            setFromRange({ ...value });
+            setFromRange({ number:value,label:value });
         } else if(range === "to") {
-            setToRange({ ...value });
+            setToRange({ number:value,label:value});
         }
     }
 
@@ -247,7 +246,7 @@ const CommentParagraph = ({
                             value={fromRange}
                             renderValue={(value) => value.label}
                             label="From"
-                            disabled={(commentUpdate && commentUpdate.idComment)}
+                            //disabled={(commentUpdate && commentUpdate.idComment)}
                             MenuProps={{ 
                                 anchorOrigin: {
                                     vertical: 'bottom',

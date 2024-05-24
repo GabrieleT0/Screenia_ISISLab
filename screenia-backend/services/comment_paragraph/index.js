@@ -177,8 +177,7 @@ const createComment = async (body, user = null) => {
             }
         }
 
-        const fromToIsNull = parseInt(body.from.number) === parseInt(body.to.number);
-
+        //const fromToIsNull = parseInt(body.from.number) === parseInt(body.to.number);
         //Creazione del commento
         const comment = await comment_paragraph.create({
             text: body.text,
@@ -188,8 +187,8 @@ const createComment = async (body, user = null) => {
             number_paragraph: body.idParagraph,
             insert_date: new Date(),
             user_id: user.id,
-            from_paragraph: fromToIsNull ? null : body.from,
-            to_paragraph: fromToIsNull ? null : body.to,
+            from_paragraph: body.from.number,
+            to_paragraph: body.to.number,
             flat_text: body.flatText,
             parent_id: body.idParent || null,
             impact: body.impact || null
