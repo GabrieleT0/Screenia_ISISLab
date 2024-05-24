@@ -131,6 +131,33 @@ function ExportModal(props) {
         } else if (e.target.value === 'txt'){
             setFormatForm(null)
             setSelectedFormat(e.target.value)
+        } else if (e.target.value === 'pptx'){
+            const export_form = (
+                <>
+                    <p><b>PPTX export options</b></p>
+                    <Form.Select aria-label="Style select" onChange={(e) => setPdfStyle(e.currentTarget.value)}>
+                        <option>Select font style</option>
+                        <option value="Courier">Courier</option>
+                        <option value="Courier-Bold">Courier-Bold</option>
+                        <option value="Courier-Oblique">Courier-Oblique</option>
+                        <option value="Courier-BoldOblique">Courier-BoldOblique</option>
+                        <option value="Helvetica">Helvetica</option>
+                        <option value="Helvetica-Bold">Helvetica-Bold</option>
+                        <option value="Helvetica-Oblique">Helvetica-Oblique</option>
+                        <option value="Helvetica-BoldOblique">Helvetica-BoldOblique</option>
+                        <option value="Symbol">Symbol</option>
+                        <option value="Times-Roman">Times-Roman</option>
+                        <option value="Times-Bold">Times-Bold</option>
+                        <option value="Times-Italic">Times-Italic</option>
+                        <option value="Times-BoldItalic">Times-BoldItalic</option>
+                        <option value="ZapfDingbats">ZapfDingbats</option>
+                    </Form.Select>
+                    <p>Font size:</p>
+                    <NumericInput min={5} max={50} value={12} onChange={(e) => setFontSize(e)}/>
+                </>
+            )
+            setFormatForm(export_form)
+            setSelectedFormat(e.target.value)
         }
     }
 
@@ -213,6 +240,17 @@ function ExportModal(props) {
                 }
             break
 
+            case 'pptx':
+                request_data = {
+                    format: selectedFormat,
+                    editors: selectedEditors,
+                    tags: selectedTags,
+                    paragraphs: selectedParagraps,
+                    font_size: fontSize,
+                    font_family: pdfStyle
+                }
+            break;
+
             default:
                 request_data = {
                     format: selectedFormat,
@@ -235,6 +273,8 @@ function ExportModal(props) {
                     link.download = 'exported_comments.pdf'
                 } else if (response_format === 'octet-stream; charset=utf-8'){
                     link.download = 'exported_comments.txt'
+                } else if (response_format === 'vnd.openxmlformats-officedocument.presentationml.presentation'){
+                    link.download = 'exported_comments.pptx'
                 }
                 document.body.appendChild(link);
                 link.click();
@@ -370,6 +410,15 @@ function ExportModal(props) {
                             label=".epub"
                             id="epub-export"
                             value="epub"
+                            onChange={handleExportFormat}
+                        />
+                        <Form.Check
+                            inline
+                            name="formats-group"
+                            type="radio"
+                            label=".pptx"
+                            id="pptx-export"
+                            value="pptx"
                             onChange={handleExportFormat}
                         />
                     </Form.Group>
